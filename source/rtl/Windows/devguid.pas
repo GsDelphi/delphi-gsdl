@@ -1,0 +1,105 @@
+unit devguid;
+
+interface
+
+(*++ BUILD Version: 0001    // Increment this if a change has global effects
+
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Module Name:
+
+    devguid.h
+
+Abstract:
+
+    Defines GUIDs for device classes used in Plug & Play.
+
+--*)
+
+const
+  GUID_DEVCLASS_1394: TGUID =                '{6bdd1fc1-810f-11d0-bec7-08002be2092f}';
+  GUID_DEVCLASS_1394DEBUG: TGUID =           '{66f250d6-7801-4a64-b139-eea80a450b24}';
+  GUID_DEVCLASS_61883: TGUID =               '{7ebefbc0-3200-11d2-b4c2-00a0c9697d07}';
+  GUID_DEVCLASS_ADAPTER: TGUID =             '{4d36e964-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_APMSUPPORT: TGUID =          '{d45b1c18-c8fa-11d1-9f77-0000f805f530}';
+  GUID_DEVCLASS_AVC: TGUID =                 '{c06ff265-ae09-48f0-812c-16753d7cba83}';
+  GUID_DEVCLASS_BATTERY: TGUID =             '{72631e54-78a4-11d0-bcf7-00aa00b7b32a}';
+  GUID_DEVCLASS_BIOMETRIC: TGUID =           '{53d29ef7-377c-4d14-864b-eb3a85769359}';
+  GUID_DEVCLASS_BLUETOOTH: TGUID =           '{e0cbf06c-cd8b-4647-bb8a-263b43f0f974}';
+  GUID_DEVCLASS_CDROM: TGUID =               '{4d36e965-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_COMPUTER: TGUID =            '{4d36e966-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_DECODER: TGUID =             '{6bdd1fc2-810f-11d0-bec7-08002be2092f}';
+  GUID_DEVCLASS_DISKDRIVE: TGUID =           '{4d36e967-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_DISPLAY: TGUID =             '{4d36e968-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_DOT4: TGUID =                '{48721b56-6795-11d2-b1a8-0080c72e74a2}';
+  GUID_DEVCLASS_DOT4PRINT: TGUID =           '{49ce6ac8-6f86-11d2-b1e5-0080c72e74a2}';
+  GUID_DEVCLASS_ENUM1394: TGUID =            '{c459df55-db08-11d1-b009-00a0c9081ff6}';
+  GUID_DEVCLASS_FDC: TGUID =                 '{4d36e969-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_FLOPPYDISK: TGUID =          '{4d36e980-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_GPS: TGUID =                 '{6bdd1fc3-810f-11d0-bec7-08002be2092f}';
+  GUID_DEVCLASS_HDC: TGUID =                 '{4d36e96a-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_HIDCLASS: TGUID =            '{745a17a0-74d3-11d0-b6fe-00a0c90f57da}';
+  GUID_DEVCLASS_IMAGE: TGUID =               '{6bdd1fc6-810f-11d0-bec7-08002be2092f}';
+  GUID_DEVCLASS_INFINIBAND: TGUID =          '{30ef7132-d858-4a0c-ac24-b9028a5cca3f}';
+  GUID_DEVCLASS_INFRARED: TGUID =            '{6bdd1fc5-810f-11d0-bec7-08002be2092f}';
+  GUID_DEVCLASS_KEYBOARD: TGUID =            '{4d36e96b-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_LEGACYDRIVER: TGUID =        '{8ecc055d-047f-11d1-a537-0000f8753ed1}';
+  GUID_DEVCLASS_MEDIA: TGUID =               '{4d36e96c-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_MEDIUM_CHANGER: TGUID =      '{ce5939ae-ebde-11d0-b181-0000f8753ec4}';
+  GUID_DEVCLASS_MODEM: TGUID =               '{4d36e96d-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_MONITOR: TGUID =             '{4d36e96e-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_MOUSE: TGUID =               '{4d36e96f-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_MTD: TGUID =                 '{4d36e970-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_MULTIFUNCTION: TGUID =       '{4d36e971-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_MULTIPORTSERIAL: TGUID =     '{50906cb8-ba12-11d1-bf5d-0000f805f530}';
+  GUID_DEVCLASS_NET: TGUID =                 '{4d36e972-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_NETCLIENT: TGUID =           '{4d36e973-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_NETSERVICE: TGUID =          '{4d36e974-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_NETTRANS: TGUID =            '{4d36e975-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_NODRIVER: TGUID =            '{4d36e976-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_PCMCIA: TGUID =              '{4d36e977-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_PNPPRINTERS: TGUID =         '{4658ee7e-f050-11d1-b6bd-00c04fa372a7}';
+  GUID_DEVCLASS_PORTS: TGUID =               '{4d36e978-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_PRINTER: TGUID =             '{4d36e979-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_PRINTERUPGRADE: TGUID =      '{4d36e97a-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_PROCESSOR: TGUID =           '{50127dc3-0f36-415e-a6cc-4cb3be910B65}';
+  GUID_DEVCLASS_SBP2: TGUID =                '{d48179be-ec20-11d1-b6b8-00c04fa372a7}';
+  GUID_DEVCLASS_SCSIADAPTER: TGUID =         '{4d36e97b-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_SECURITYACCELERATOR: TGUID = '{268c95a1-edfe-11d3-95c3-0010dc4050a5}';
+  GUID_DEVCLASS_SMARTCARDREADER: TGUID =     '{50dd5230-ba8a-11d1-bf5d-0000f805f530}';
+  GUID_DEVCLASS_SOUND: TGUID =               '{4d36e97c-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_SYSTEM: TGUID =              '{4d36e97d-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_TAPEDRIVE: TGUID =           '{6d807884-7d21-11cf-801c-08002be10318}';
+  GUID_DEVCLASS_UNKNOWN: TGUID =             '{4d36e97e-e325-11ce-bfc1-08002be10318}';
+  GUID_DEVCLASS_USB: TGUID =                 '{36fc9e60-c465-11cf-8056-444553540000}';
+  GUID_DEVCLASS_VOLUME: TGUID =              '{71a27cdd-812a-11d0-bec7-08002be2092f}';
+  GUID_DEVCLASS_VOLUMESNAPSHOT: TGUID =      '{533c5b84-ec70-11d2-9505-00c04f79deaf}';
+  GUID_DEVCLASS_WCEUSBS: TGUID =             '{25dbce51-6c8f-4a72-8a6d-b54c2b4fc835}';
+
+//
+// Define filesystem filter classes used for classification and load ordering.
+// Classes are listed below in order from "highest" (i.e., farthest from the
+// filesystem) to "lowest" (i.e., closest to the filesystem).
+//
+  GUID_DEVCLASS_FSFILTER_ACTIVITYMONITOR: TGUID =         '{b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}';
+  GUID_DEVCLASS_FSFILTER_UNDELETE: TGUID =                '{fe8f1572-c67a-48c0-bbac-0b5c6d66cafb}';
+  GUID_DEVCLASS_FSFILTER_ANTIVIRUS: TGUID =               '{b1d1a169-c54f-4379-81db-bee7d88d7454}';
+  GUID_DEVCLASS_FSFILTER_REPLICATION: TGUID =             '{48d3ebc4-4cf8-48ff-b869-9c68ad42eb9f}';
+  GUID_DEVCLASS_FSFILTER_CONTINUOUSBACKUP: TGUID =        '{71aa14f8-6fad-4622-ad77-92bb9d7e6947}';
+  GUID_DEVCLASS_FSFILTER_CONTENTSCREENER: TGUID =         '{3e3f0674-c83c-4558-bb26-9820e1eba5c5}';
+  GUID_DEVCLASS_FSFILTER_QUOTAMANAGEMENT: TGUID =         '{8503c911-a6c7-4919-8f79-5028f5866b0c}';
+  GUID_DEVCLASS_FSFILTER_SYSTEMRECOVERY: TGUID =          '{2db15374-706e-4131-a0c7-d7c78eb0289a}';
+  GUID_DEVCLASS_FSFILTER_CFSMETADATASERVER: TGUID =       '{cdcf0939-b75b-4630-bf76-80f7ba655884}';
+  GUID_DEVCLASS_FSFILTER_HSM: TGUID =                     '{d546500a-2aeb-45f6-9482-f4b1799c3177}';
+  GUID_DEVCLASS_FSFILTER_COMPRESSION: TGUID =             '{f3586baf-b5aa-49b5-8d6c-0569284c639f}';
+  GUID_DEVCLASS_FSFILTER_ENCRYPTION: TGUID =              '{a0a701c0-a511-42ff-aa6c-06dc0395576f}';
+  GUID_DEVCLASS_FSFILTER_PHYSICALQUOTAMANAGEMENT: TGUID = '{6a0a8e78-bba6-4fc4-a709-1e33cd09d67e}';
+  GUID_DEVCLASS_FSFILTER_OPENFILEBACKUP: TGUID =          '{f8ecafa6-66d1-41a5-899b-66585d7216b7}';
+  GUID_DEVCLASS_FSFILTER_SECURITYENHANCER: TGUID =        '{d02bc3da-0c8e-4945-9bd5-f1883c226c8c}';
+  GUID_DEVCLASS_FSFILTER_COPYPROTECTION: TGUID =          '{89786ff1-9c12-402f-9c9e-17753c7f4375}';
+  GUID_DEVCLASS_FSFILTER_SYSTEM: TGUID =                  '{5d1b9aaa-01e2-46af-849f-272b3f324c46}';
+  GUID_DEVCLASS_FSFILTER_INFRASTRUCTURE: TGUID =          '{e55fa6f9-128c-4d04-abab-630c74b1453a}';
+
+implementation
+
+end.
