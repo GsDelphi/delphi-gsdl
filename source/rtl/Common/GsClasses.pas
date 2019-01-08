@@ -51,8 +51,6 @@ type
   public
     class function Name: String; virtual;
     function WaitForInISAPI: LongWord;
-  published
-    property About: TGsAboutInfo read FAboutInfo write FAboutInfo stored False;
   end;
 
 implementation
