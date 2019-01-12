@@ -1,3 +1,6 @@
 [submodule "source/include/jedi"]
 	path = source/include/jedi
 	url = https://github.com/gilbertsoft/delphi-jedi
+[submodule "thirdparty/Synopse/mORMot"]
+	path = thirdparty/Synopse/mORMot
+	url = https://github.com/gilbertsoft/mORMot.git
