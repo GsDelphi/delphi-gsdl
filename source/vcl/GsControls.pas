@@ -170,19 +170,11 @@ var
   function AssignItems(Items: TStrings): Integer;
 
     function GetItemIndex: Integer;
-    var
-      I: Integer;
     begin
       Result := -1;
 
-      for I := 0 to Items.Count - 1 do
-      begin
-        if Value = Integer(Items.Objects[I]) then
-        begin
-          Result := I;
-          Exit;
-        end;
-      end;
+      if (Value < DescriptorInfo.Length) then
+        Result := DescriptorInfo.Descriptors^[Value].ItemIndex;
     end;
 
   resourcestring
