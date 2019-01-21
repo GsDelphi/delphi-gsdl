@@ -58,8 +58,6 @@ type
     destructor Destroy; override;
   end;
 
-  TBPSplitter = TGsSplitter;
-
 implementation
 
 uses
