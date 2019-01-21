@@ -26,7 +26,7 @@
 
   @name contains system constants and resourcestrings.
 }
-unit GsComDB;
+unit GsComDB;
 
 {$I gsdl.inc}
 {$I windowsonly.inc}
@@ -35,24 +35,26 @@
 interface
 
 uses
-  SysUtils, MSPORTS, SyncObjs, Messages, GSClasses;
+  GSClasses,
+  Messages,
+  MSPORTS,
+  SyncObjs,
+  SysUtils;
 
 type
   { exceptions }
   EGSComDBError = class(Exception);
 
-
-
   { user types }
-	TGSComPort = 1..COMDB_MAX_PORTS_ARBITRATED;
+  TGSComPort = 1 .. COMDB_MAX_PORTS_ARBITRATED;
 
   TGSComPortStatus = array [TGSComPort] of Boolean;
 
   TGSComPortProperties = record
     case IsFTDI: Boolean of
       True: (VendorID: String[20];
-             ProductID: String[20];
-             Serial: String[20]);
+        ProductID: String[20];
+        Serial: String[20]);
       False: ();
   end;
 
@@ -63,7 +65,8 @@ type
   protected
     function GetPortAccessible(APort: TGSComPort): Boolean; virtual; abstract;
     function GetPortAvailable(APort: TGSComPort): Boolean; virtual; abstract;
-    function GetPortProperties(APort: TGSComPort): TGSComPortProperties; virtual; abstract;
+    function GetPortProperties(APort: TGSComPort): TGSComPortProperties;
+      virtual; abstract;
     function GetUpdateTerminatedEvent: TSimpleEvent; virtual; abstract;
     function GetUpdatingPorts: Boolean; virtual; abstract;
     procedure DoUpdate; virtual; abstract;
@@ -72,7 +75,8 @@ type
 
     property PortAvailable[APort: TGSComPort]: Boolean read GetPortAvailable;
     property PortAccessible[APort: TGSComPort]: Boolean read GetPortAccessible;
-    property PortProperties[APort: TGSComPort]: TGSComPortProperties read GetPortProperties;
+    property PortProperties[APort: TGSComPort]: TGSComPortProperties
+      read GetPortProperties;
 
     property UpdatingPorts: Boolean read GetUpdatingPorts;
     property UpdateTerminatedEvent: TSimpleEvent read GetUpdateTerminatedEvent;
@@ -96,8 +100,14 @@ implementation
 
 uses
   {$IFDEF USE_CODESITE}BPLogging,{$ENDIF}
-  JwaWindows, devguid, Classes, GSDevices, Registry, GSIDEUtils,
-  BPUtils, BPSystem;
+  JwaWindows,
+  devguid,
+  Classes,
+  GSDevices,
+  Registry,
+  GSIDEUtils,
+  BPUtils,
+  BPSystem;
 
 type
   { forward class declarations }
@@ -129,9 +139,9 @@ type
     procedure DoUpdate;
     procedure RaiseLastOSError(CalledFunction: String);
   protected
-		procedure ExecuteNew; override;
-	public
-		constructor Create(AOwner: TGlobalGSComDatabase);
+    procedure ExecuteNew; override;
+  public
+    constructor Create(AOwner: TGlobalGSComDatabase);
 
     class function Name: String; override;
   end;
@@ -178,30 +188,30 @@ procedure TGlobalGSComDatabase.DeviceChangeEvent(ASender: TObject;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'DeviceChangeEvent');{$ENDIF}
 
-  { TODO: try to get a more detailed info with RegisterDeviceNotification}
+  { TODO: try to get a more detailed info with RegisterDeviceNotification }
   if (AMessage.WParam = DBT_DEVNODES_CHANGED) then
   begin
     Update;
   end;
 
   {
-  if (AMessage.WParam = DBT_DEVICEARRIVAL) or (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
-  begin
+    if (AMessage.WParam = DBT_DEVICEARRIVAL) or (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
+    begin
     case DEV_BROADCAST_HDR(Pointer(AMessage.LParam)^).dbch_devicetype of
-      (*
-      DBT_DEVTYP_OEM: begin
-        DEV_BROADCAST_OEM(Pointer(AMessage.LParam)^).dbco_devicetype
-      end;
-      DBT_DEVTYP_PORT: begin
-        DEV_BROADCAST_PORT(Pointer(AMessage.LParam)^).dbco_devicetype
-      end;
-      *)
-      DBT_DEVTYP_DEVICEINTERFACE: begin
-        if IsEqualGUID(DEV_BROADCAST_DEVICEINTERFACE(Pointer(AMessage.LParam)^).dbcc_classguid, GUID_DEVCLASS_PORTS) then
-          Update;
-      end;
+    (*
+    DBT_DEVTYP_OEM: begin
+    DEV_BROADCAST_OEM(Pointer(AMessage.LParam)^).dbco_devicetype
     end;
-  end;
+    DBT_DEVTYP_PORT: begin
+    DEV_BROADCAST_PORT(Pointer(AMessage.LParam)^).dbco_devicetype
+    end;
+    *)
+    DBT_DEVTYP_DEVICEINTERFACE: begin
+    if IsEqualGUID(DEV_BROADCAST_DEVICEINTERFACE(Pointer(AMessage.LParam)^).dbcc_classguid, GUID_DEVCLASS_PORTS) then
+    Update;
+    end;
+    end;
+    end;
   }
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'DeviceChangeEvent');{$ENDIF}
@@ -230,14 +240,18 @@ begin
 
   if PortAvailable[APort] or (APort < 20) then
   begin
-    {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('Testing port');{$ENDIF}
-    {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port', APort);{$ENDIF}
+    {$IFDEF USE_CODESITE}
+    BPC_CodeSite.EnterMethod('Testing port');
+    BPC_CodeSite.Send('Port', APort);
+    {$ENDIF}
 
     try
       {$IFDEF SUPPORTS_UNICODE}
-      PortHandle := CreateFile(PWideChar(Format('\\.\COM%d', [APort])), (GENERIC_READ or GENERIC_WRITE), 0, nil, OPEN_EXISTING, 0, 0);
+      PortHandle := CreateFile(PWideChar(Format('\\.\COM%d', [APort])),
+        (GENERIC_READ or GENERIC_WRITE), 0, nil, OPEN_EXISTING, 0, 0);
       {$ELSE ~SUPPORTS_UNICODE}
-      PortHandle := CreateFile(PAnsiChar(Format('\\.\COM%d', [APort])), (GENERIC_READ or GENERIC_WRITE), 0, nil, OPEN_EXISTING, 0, 0);
+      PortHandle := CreateFile(PAnsiChar(Format('\\.\COM%d', [APort])),
+        (GENERIC_READ or GENERIC_WRITE), 0, nil, OPEN_EXISTING, 0, 0);
       {$ENDIF ~SUPPORTS_UNICODE}
 
       try
@@ -261,9 +275,11 @@ begin
           CloseHandle(PortHandle);
       end;
     finally
-      {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port available', FAvailablePorts[APort]);{$ENDIF}
-      {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port accessible', Result);{$ENDIF}
-      {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('Testing port');{$ENDIF}
+      {$IFDEF USE_CODESITE}
+      BPC_CodeSite.Send('Port available', FAvailablePorts[APort]);
+      BPC_CodeSite.Send('Port accessible', Result);
+      BPC_CodeSite.ExitMethod('Testing port');
+      {$ENDIF}
     end;
   end;
 
@@ -279,8 +295,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'GetPortAvailable');{$ENDIF}
 end;
 
-function TGlobalGSComDatabase.GetPortProperties(
-  APort: TGSComPort): TGSComPortProperties;
+function TGlobalGSComDatabase.GetPortProperties(APort: TGSComPort): TGSComPortProperties;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetPortProperties');{$ENDIF}
 
@@ -291,7 +306,8 @@ end;
 
 function TGlobalGSComDatabase.GetUpdateTerminatedEvent: TSimpleEvent;
 begin
-  {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetUpdateTerminatedEvent');{$ENDIF}
+  {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetUpdateTerminatedEvent');
+{$ENDIF}
 
   Result := FUpdateTerminatedEvent;
 
@@ -309,14 +325,13 @@ end;
 
 { TGSComDatabaseUpdateThread }
 
-constructor TGSComDatabaseUpdateThread.Create(
-  AOwner: TGlobalGSComDatabase);
+constructor TGSComDatabaseUpdateThread.Create(AOwner: TGlobalGSComDatabase);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'Create');{$ENDIF}
 
   inherited Create(True);
 
-	Priority := tpLowest;
+  Priority := tpLowest;
   FOwner := AOwner;
 
   Resume;
@@ -332,12 +347,9 @@ var
   DBError: LONG;
   Dummy: DWORD;
   P: TGSComPort;
-  DevCount,
-  lDev,
-  i: Integer;
+  DevCount, lDev, i: Integer;
   DevList: TStrings;
-  PName,
-  DevStr: String;
+  PName, DevStr: String;
   Reg: TRegistry;
   cPort: TGSComPort;
 begin
@@ -358,13 +370,12 @@ begin
       RaiseLastOSError('ComDBGetCurrentPortUsage');
     end;
 
-
     { get com db port usage }
     GetMem(Buf, BufSize);
 
     try
-
-      DBError := ComDBGetCurrentPortUsage(ComDB, Buf^, BufSize, CDB_REPORT_BYTES, Dummy);
+      DBError := ComDBGetCurrentPortUsage(ComDB, Buf^, BufSize,
+        CDB_REPORT_BYTES, Dummy);
 
       if (DBError <> LONG(ERROR_SUCCESS)) then
       begin
@@ -394,7 +405,6 @@ begin
   else
     RaiseLastOSError('ComDBOpen');
 
-
   { search ftdi chips }
   Reg := TRegistry.Create(KEY_READ);
 
@@ -421,13 +431,15 @@ begin
             Reg.CloseKey;
 
             if Reg.OpenKeyReadOnly(REGSTR_PATH_SYSTEMENUM + '\' +
-                                   DevList.Strings[i] + '\' +
-                                   REGSTR_KEY_DEVICEPARAMETERS) then
+              DevList.Strings[i] + '\' + REGSTR_KEY_DEVICEPARAMETERS) then
             begin
               if Reg.ValueExists(REGSTR_VAL_PORTNAME) then
               begin
                 PName := Reg.ReadString(REGSTR_VAL_PORTNAME);
-                {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Check port for FTDI', PName);{$ENDIF}
+
+                {$IFDEF USE_CODESITE}
+                BPC_CodeSite.Send('Check port for FTDI', PName);
+                {$ENDIF}
 
                 if (Copy(PName, 1, 3) = 'COM') then
                 begin
@@ -439,11 +451,15 @@ begin
                     lDev := Length(DevStr);
 
                     FOwner.FPropertiesList[cPort].IsFTDI := True;
-                    FOwner.FPropertiesList[cPort].VendorID := ShortString(Copy(GetStrEx(1, DevStr, '+'), 5, lDev));
-                    FOwner.FPropertiesList[cPort].ProductID := ShortString(Copy(GetStrEx(2, DevStr, '+'), 5, lDev));
-                    FOwner.FPropertiesList[cPort].Serial := ShortString(Copy(GetStrEx(3, DevStr, '+'), 1, 8));
+                    FOwner.FPropertiesList[cPort].VendorID :=
+                      ShortString(Copy(GetStrEx(1, DevStr, '+'), 5, lDev));
+                    FOwner.FPropertiesList[cPort].ProductID :=
+                      ShortString(Copy(GetStrEx(2, DevStr, '+'), 5, lDev));
+                    FOwner.FPropertiesList[cPort].Serial :=
+                      ShortString(Copy(GetStrEx(3, DevStr, '+'), 1, 8));
 
-                    {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port is FTDI', FOwner.FPropertiesList[cPort].IsFTDI);{$ENDIF}
+                    {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port is FTDI',
+                      FOwner.FPropertiesList[cPort].IsFTDI);{$ENDIF}
                   except
                   end;
                 end;
@@ -459,24 +475,24 @@ begin
     Reg.Free;
   end;
 
-{  // Create a HDEVINFO with all present devices.
-  DeviceInfo := SetupDiGetClassDevs(nil,
-      nil, // Enumerator
-      0,
-      DIGCF_PRESENT or DIGCF_ALLCLASSES );
+  { // Create a HDEVINFO with all present devices.
+    DeviceInfo := SetupDiGetClassDevs(nil,
+    nil, // Enumerator
+    0,
+    DIGCF_PRESENT or DIGCF_ALLCLASSES );
 
-  if (DWORD(DeviceInfo) = INVALID_HANDLE_VALUE) then
-  begin
-      // Insert error handling here.
-      Exit;
-  end;
+    if (DWORD(DeviceInfo) = INVALID_HANDLE_VALUE) then
+    begin
+    // Insert error handling here.
+    Exit;
+    end;
 
-  // Enumerate through all devices in Set.
-  DeviceInfoData.cbSize := sizeof(SP_DEVINFO_DATA);
-  i := 0;
+    // Enumerate through all devices in Set.
+    DeviceInfoData.cbSize := sizeof(SP_DEVINFO_DATA);
+    i := 0;
 
-  while (SetupDiEnumDeviceInfo(DeviceInfo, i, DeviceInfoData)) do
-  begin
+    while (SetupDiEnumDeviceInfo(DeviceInfo, i, DeviceInfoData)) do
+    begin
     buffer := nil;
     buffersize := 0;
 
@@ -488,48 +504,48 @@ begin
     //
 
     while not SetupDiGetDeviceRegistryProperty(
-        DeviceInfo,
-        DeviceInfoData,
-        SPDRP_DEVICEDESC,
-        @DataT,
-        PBYTE(buffer),
-        buffersize,
-        @buffersize) do
+    DeviceInfo,
+    DeviceInfoData,
+    SPDRP_DEVICEDESC,
+    @DataT,
+    PBYTE(buffer),
+    buffersize,
+    @buffersize) do
     begin
-      if (GetLastError() = ERROR_INSUFFICIENT_BUFFER) then
-      begin
-        // Change the buffer size.
-        if Assigned(buffer) then
-          LocalFree(HLOCAL(buffer));
+    if (GetLastError() = ERROR_INSUFFICIENT_BUFFER) then
+    begin
+    // Change the buffer size.
+    if Assigned(buffer) then
+    LocalFree(HLOCAL(buffer));
 
-        buffer := LPTSTR(LocalAlloc(LPTR, buffersize));
-      end
-      else
-      begin
-        // Insert error handling here.
-        System.Break;
-      end;
+    buffer := LPTSTR(LocalAlloc(LPTR, buffersize));
+    end
+    else
+    begin
+    // Insert error handling here.
+    System.Break;
+    end;
     end;
 
     printf("Device: %s\n",buffer);
 
     if (buffer) then
-      LocalFree(buffer);
+    LocalFree(buffer);
 
     Inc(i);
-  end;
+    end;
 
-  if ( GetLastError()!=NO_ERROR &&
-       GetLastError()!=ERROR_NO_MORE_ITEMS )
-  begin
-      // Insert error handling here.
-      return 1;
-  end;
+    if ( GetLastError()!=NO_ERROR &&
+    GetLastError()!=ERROR_NO_MORE_ITEMS )
+    begin
+    // Insert error handling here.
+    return 1;
+    end;
 
-  //  Cleanup
-  SetupDiDestroyDeviceInfoList(DeviceInfo);
+    //  Cleanup
+    SetupDiDestroyDeviceInfoList(DeviceInfo);
 
-  return 0;}
+    return 0; }
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'DoUpdate');{$ENDIF}
 end;
@@ -563,15 +579,16 @@ end;
 
 class function TGSComDatabaseUpdateThread.Name: String;
 begin
-  {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('TGSComDatabaseUpdateThread.Name');{$ENDIF}
+  {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('TGSComDatabaseUpdateThread.Name');
+{$ENDIF}
 
   Result := 'ComDatabaseUpdateThread';
 
-  {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('TGSComDatabaseUpdateThread.Name');{$ENDIF}
+  {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('TGSComDatabaseUpdateThread.Name');
+{$ENDIF}
 end;
 
-procedure TGSComDatabaseUpdateThread.RaiseLastOSError(
-  CalledFunction: String);
+procedure TGSComDatabaseUpdateThread.RaiseLastOSError(CalledFunction: String);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'LogLastWinError');{$ENDIF}
 
@@ -610,8 +627,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'DoUpdate');{$ENDIF}
 end;
 
-function TCustomGSComDatabase.GetPortAccessible(
-  APort: TGSComPort): Boolean;
+function TCustomGSComDatabase.GetPortAccessible(APort: TGSComPort): Boolean;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetPortAccessible');{$ENDIF}
 
@@ -629,8 +645,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'GetPortAvailable');{$ENDIF}
 end;
 
-function TCustomGSComDatabase.GetPortProperties(
-  APort: TGSComPort): TGSComPortProperties;
+function TCustomGSComDatabase.GetPortProperties(APort: TGSComPort): TGSComPortProperties;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetPortProperties');{$ENDIF}
 
@@ -641,7 +656,8 @@ end;
 
 function TCustomGSComDatabase.GetUpdateTerminatedEvent: TSimpleEvent;
 begin
-  {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetUpdateTerminatedEvent');{$ENDIF}
+  {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetUpdateTerminatedEvent');
+{$ENDIF}
 
   Result := lGlobalGSComDatabase.UpdateTerminatedEvent;
 
@@ -666,6 +682,7 @@ initialization
     lGlobalGSComDatabase := nil;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitInitialization('GSComDB');{$ENDIF}
+
 finalization
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterFinalization('GSComDB');{$ENDIF}
 
@@ -674,4 +691,3 @@ finalization
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitFinalization('GSComDB');{$ENDIF}
 end.
-
