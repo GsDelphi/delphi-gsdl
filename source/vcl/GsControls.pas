@@ -19,14 +19,15 @@
 }
 unit GsControls;
 
-{$R-} { Disable range checks }
+{$R-}{ Disable range checks }
 
 interface
 
 uses
   Classes,
   Controls,
-  GsSystem;
+  GsSystem,
+  RzRadGrp;
 
 (*
 {$IFDEF mORMot}
@@ -51,13 +52,81 @@ procedure RegisterCustomAssignEnumProc(AControlClass: TControlClass;
 
 //    GetEnumName(TypeInfo: PTypeInfo; Value: Integer): string;
 
+type
+  TEventType      = (etNotify, etIndexChanging);
+  TEventID        = type Byte;
+  PNotifyEventRec = ^TNotifyEventRec;
+
+  TNotifyEventRec = record
+    Control: TControl;
+    EventID: TEventID;
+    case EventType: TEventType of
+      etNotify: (NotifyEvent: TNotifyEvent);
+      etIndexChanging: (IndexChangingEvent: TRzIndexChangingEvent);
+  end;
+
+  TGsChangeNotifier = class(TComponent)
+  private
+    FList:           TList;
+    FOnChange:       TNotifyEvent;
+    FEventsDisabled: Boolean;
+  protected
+    procedure Loaded; override;
+
+    procedure ChainEvents; dynamic;
+    procedure UnchainEvents; dynamic;
+    procedure Change(Sender: TObject);
+
+    procedure NotifyEvent(EventID: TEventID; Sender: TObject);
+    procedure NotifyEvent0(Sender: TObject);
+    procedure NotifyEvent1(Sender: TObject);
+    procedure NotifyEvent2(Sender: TObject);
+    procedure NotifyEvent3(Sender: TObject);
+    procedure NotifyEvent4(Sender: TObject);
+    procedure NotifyEvent5(Sender: TObject);
+    procedure NotifyEvent6(Sender: TObject);
+    procedure NotifyEvent7(Sender: TObject);
+    procedure NotifyEvent8(Sender: TObject);
+    procedure NotifyEvent9(Sender: TObject);
+
+    procedure IndexChangingEvent(Sender: TObject; NewIndex: Integer;
+      var AllowChange: Boolean);
+
+    function AddEvent: PNotifyEventRec;
+
+    procedure RegisterEvent(AControl: TControl; EventID: TEventID;
+      Event: TNotifyEvent); overload;
+    procedure RegisterEvent(AControl: TControl; Event: TRzIndexChangingEvent);
+      overload;
+  public
+    constructor Create(AOwner: TComponent); overload; override;
+    destructor Destroy; override;
+
+    procedure DisableEvents;
+    procedure EnableEvents;
+  published
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+  end;
+
 implementation
 
 uses
-  SysUtils,
+  Dialogs,
+  ExtCtrls,
+  RzBtnEdt,
+  RzButton,
+  RzCmboBx,
+  RzEdit,
+  RzPanel,
+  RzRadChk,
   StdCtrls,
-  Windows,
-  RzRadGrp;
+  SysUtils,
+  Types,
+  UITypes,
+  Windows;
+
+resourcestring
+  SErrorControlNotRegistered = 'Klasse ''%s'' ist nicht registriert in %s';
 
 type
   TCustomAssignEnumItem = record
@@ -107,7 +176,7 @@ resourcestring
   SErrorControlClassNotImplemented =
     'Klasse ''%s'' ist nicht implementiert!';
 var
-  ClassPath: String;
+  ClassPath: string;
   ParentClass: TClass;
 begin
   ClassPath := AControl.ClassName;
@@ -173,7 +242,7 @@ var
     begin
       Result := -1;
 
-      if (Value < DescriptorInfo.Length) then
+      if (Value >= 0) and (Cardinal(Value) < DescriptorInfo.Length) then
         Result := DescriptorInfo.Descriptors^[Value].ItemIndex;
     end;
 
@@ -201,7 +270,8 @@ var
     begin
       J := 0;
 
-      while (Cardinal(J) < DescriptorInfo.Length) and (DescriptorInfo.Descriptors^[J].ItemIndex <> I) do
+      while (Cardinal(J) < DescriptorInfo.Length) and
+        (DescriptorInfo.Descriptors^[J].ItemIndex <> I) do
         Inc(J);
 
       if (J = DescriptorInfo.Length) then
@@ -221,7 +291,7 @@ resourcestring
     'Fehler ''%s'' in Prozedur ''AssignEnum'': %s';
 var
   RzRadioGroup: TRzRadioGroup;
-  CustomCombo: TCustomCombo;
+  CustomCombo:  TCustomCombo;
   CustomListBox: TCustomListBox;
 begin
   try
@@ -288,7 +358,7 @@ function GetSelectedEnum(AControl: TControl; DescriptorInfo: TEnumDescriptorInfo
 
 var
   RzRadioGroup: TRzRadioGroup;
-  CustomCombo: TCustomCombo;
+  CustomCombo:  TCustomCombo;
   CustomListBox: TCustomListBox;
 begin
   if (AControl.Tag <> GetItemsAssignedValue) then
@@ -433,6 +503,342 @@ end;
 function TCustomAssignEnumList.LastFound: Integer;
 begin
   Result := FLastFound;
+end;
+
+{ TGsChangeNotifier }
+
+function TGsChangeNotifier.AddEvent: PNotifyEventRec;
+begin
+  New(Result);
+  FList.Add(Result);
+end;
+
+procedure TGsChangeNotifier.ChainEvents;
+var
+  I: Integer;
+  Control: TControl;
+begin
+  { TODO 1 : remove }
+  // Exit;
+
+  with Owner do
+  begin
+    for I := 0 to ComponentCount - 1 do
+    begin
+      if Components[I] is TControl then
+      begin
+        // TControl
+        // |- TWinControl
+        // |    |- TCustomListControl
+        // |    |    |- TCustomMultiSelectListControl
+        // |    |    |    |- TCustomListBox
+        // |    |    |    |- TCustomListView
+        // |    |    |- TCustomCombo
+        // |    |- TCustomControl
+        // |         |- TCustomPanel
+        // |- TGraphicControl
+        // |- TCustomLabel
+
+        if not (Components[I] is TRzCustomRadioGroup) and not
+          (Components[I] is TRzCustomCheckGroup) and
+          ((Components[I] is TCustomMultiSelectListControl) or
+          (Components[I] is TCustomPanel) or (Components[I] is TCustomLabel) or
+          (Components[I] is TRzSpacer) or (Components[I] is TRzToolButton) or
+          (Components[I] is TRzToolButton) or (Components[I] is TRzCustomButton))
+        then
+        begin
+          Continue;
+        end;
+
+        (*
+          trztreeview
+          trzdbgrid
+          trzpagecontrol
+          trztabsheet
+        *)
+
+        (*
+          if (Components[I] is TCustomEdit) or
+          (Components[I] is TCustomListControl) or
+          (Components[I] is TRzRadioButton) or
+          (Components[I] is TRzCustomCheckBox) or
+          //(Components[I] is TCustomCheckBox) or
+          //(Components[I] is TRadioButton) or
+          (Components[I] is TRzCustomRadioGroup) or
+          //(Components[I] is TRzCustomRadioGroup) or
+          //(Components[I] is TRzCustomRadioGroup) or
+          //(Components[I] is TRzCustomRadioGroup) or
+          (Components[I] is TCustomEdit) then
+          begin
+
+          end;
+        *)
+
+        Control := TControl(Components[I]);
+
+        if Components[I] is TRzEdit then
+        begin
+          RegisterEvent(Control, 0, TRzEdit(Components[I]).OnChange);
+          TRzEdit(Components[I]).OnChange := NotifyEvent0;
+        end
+        else if Components[I] is TRzMemo then
+        begin
+          RegisterEvent(Control, 0, TRzMemo(Components[I]).OnChange);
+          TRzMemo(Components[I]).OnChange := NotifyEvent0;
+        end
+        else if Components[I] is TRzComboBox then
+        begin
+          RegisterEvent(Control, 0, TRzComboBox(Components[I]).OnChange);
+          TRzComboBox(Components[I]).OnChange := NotifyEvent0;
+        end
+        else if Components[I] is TRzCheckBox then
+        begin
+          RegisterEvent(Control, 0, TRzCheckBox(Components[I]).OnClick);
+          TRzCheckBox(Components[I]).OnClick := NotifyEvent0;
+        end
+        else if Components[I] is TRzRadioGroup then
+        begin
+          RegisterEvent(Control, TRzRadioGroup(Components[I]).OnChanging);
+          TRzRadioGroup(Components[I]).OnChanging := IndexChangingEvent;
+        end
+        else
+          MessageDlg(Format(SErrorControlNotRegistered,
+            [Components[I].ClassName, Self.ClassName]), mtError, [mbOK], 0);
+        { TODO : activate }
+        // raise Exception.CreateResFmt(@SErrorControlNotRegistered, [Components[I].ClassName, Self.ClassName]);
+      end;
+    end;
+  end;
+end;
+
+procedure TGsChangeNotifier.Change(Sender: TObject);
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Sender);
+end;
+
+constructor TGsChangeNotifier.Create(AOwner: TComponent);
+begin
+  inherited;
+
+  FList := TList.Create;
+  { TODO : delete after using }
+  ChainEvents;
+end;
+
+destructor TGsChangeNotifier.Destroy;
+begin
+  if not (csDesigning in ComponentState) then
+    UnchainEvents;
+
+  while FList.Count > 0 do
+    Dispose(FList.Extract(FList.Last));
+
+  FList.Free;
+
+  inherited;
+end;
+
+procedure TGsChangeNotifier.DisableEvents;
+begin
+  FEventsDisabled := True;
+end;
+
+procedure TGsChangeNotifier.EnableEvents;
+begin
+  FEventsDisabled := False;
+end;
+
+procedure TGsChangeNotifier.IndexChangingEvent(Sender: TObject;
+  NewIndex: Integer; var AllowChange: Boolean);
+var
+  I: Integer;
+begin
+  if not FEventsDisabled and Assigned(Sender) and (Sender is TControl) then
+  begin
+    for I := 0 to FList.Count - 1 do
+    begin
+      if (PNotifyEventRec(FList.Items[I])^.Control = Sender) and
+        (PNotifyEventRec(FList.Items[I])^.EventType = etIndexChanging) then
+      begin
+        Change(Sender);
+
+        if @PNotifyEventRec(FList.Items[I])^.IndexChangingEvent <> nil then
+          PNotifyEventRec(FList.Items[I])^.IndexChangingEvent(Sender, NewIndex,
+            AllowChange);
+
+        Break;
+      end;
+    end;
+  end;
+end;
+
+procedure TGsChangeNotifier.Loaded;
+var
+  Loading: Boolean;
+begin
+  Loading := csLoading in ComponentState;
+
+  inherited;
+
+  if not (csDesigning in ComponentState) then
+  begin
+    if Loading then
+      ChainEvents;
+  end;
+end;
+
+procedure TGsChangeNotifier.NotifyEvent(EventID: TEventID; Sender: TObject);
+var
+  I: Integer;
+begin
+  if not FEventsDisabled and Assigned(Sender) and (Sender is TControl) then
+  begin
+    for I := 0 to FList.Count - 1 do
+    begin
+      if (PNotifyEventRec(FList.Items[I])^.Control = Sender) and
+        (PNotifyEventRec(FList.Items[I])^.EventType = etNotify) and
+        (PNotifyEventRec(FList.Items[I])^.EventID = EventID) then
+      begin
+        Change(Sender);
+
+        if @PNotifyEventRec(FList.Items[I])^.NotifyEvent <> nil then
+          PNotifyEventRec(FList.Items[I])^.NotifyEvent(Sender);
+
+        Break;
+      end;
+    end;
+  end;
+end;
+
+procedure TGsChangeNotifier.NotifyEvent0(Sender: TObject);
+begin
+  NotifyEvent(0, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent1(Sender: TObject);
+begin
+  NotifyEvent(1, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent2(Sender: TObject);
+begin
+  NotifyEvent(2, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent3(Sender: TObject);
+begin
+  NotifyEvent(3, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent4(Sender: TObject);
+begin
+  NotifyEvent(4, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent5(Sender: TObject);
+begin
+  NotifyEvent(5, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent6(Sender: TObject);
+begin
+  NotifyEvent(6, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent7(Sender: TObject);
+begin
+  NotifyEvent(7, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent8(Sender: TObject);
+begin
+  NotifyEvent(8, Sender);
+end;
+
+procedure TGsChangeNotifier.NotifyEvent9(Sender: TObject);
+begin
+  NotifyEvent(9, Sender);
+end;
+
+procedure TGsChangeNotifier.RegisterEvent(AControl: TControl;
+  EventID: TEventID; Event: TNotifyEvent);
+begin
+  with AddEvent^ do
+  begin
+    Control := AControl;
+    EventID := EventID;
+    EventType := etNotify;
+    NotifyEvent := Event;
+  end;
+end;
+
+procedure TGsChangeNotifier.RegisterEvent(AControl: TControl;
+  Event: TRzIndexChangingEvent);
+begin
+  with AddEvent^ do
+  begin
+    Control := AControl;
+    EventID := 0;
+    EventType := etIndexChanging;
+    IndexChangingEvent := Event;
+  end;
+end;
+
+procedure TGsChangeNotifier.UnchainEvents;
+var
+  I, J: Integer;
+begin
+  { TODO 1 : remove }
+  // Exit;
+
+  with Owner do
+  begin
+    for I := 0 to ComponentCount - 1 do
+    begin
+      if Components[I] is TControl then
+      begin
+        for J := 0 to FList.Count - 1 do
+        begin
+          if (PNotifyEventRec(FList.Items[J])^.Control = Pointer(Components[I]))
+          then
+          begin
+            if Components[I] is TRzEdit then
+            begin
+              TRzEdit(Components[I]).OnChange :=
+                PNotifyEventRec(FList.Items[J])^.NotifyEvent;
+            end
+            else if Components[I] is TRzMemo then
+            begin
+              TRzMemo(Components[I]).OnChange :=
+                PNotifyEventRec(FList.Items[J])^.NotifyEvent;
+            end
+            else if Components[I] is TRzComboBox then
+            begin
+              TRzComboBox(Components[I]).OnChange :=
+                PNotifyEventRec(FList.Items[J])^.NotifyEvent;
+            end
+            else if Components[I] is TRzCheckBox then
+            begin
+              TRzCheckBox(Components[I]).OnClick :=
+                PNotifyEventRec(FList.Items[J])^.NotifyEvent;
+            end
+            else if Components[I] is TRzRadioGroup then
+            begin
+              TRzRadioGroup(Components[I]).OnChanging :=
+                PNotifyEventRec(FList.Items[J])^.IndexChangingEvent;
+            end
+            else
+              MessageDlg(Format(SErrorControlNotRegistered,
+                [Components[I].ClassName, Self.ClassName]), mtError,
+                [mbOK], 0);
+            { TODO : activate }
+            // raise Exception.CreateResFmt(@SErrorControlNotRegistered, [Components[I].ClassName, Self.ClassName]);
+          end;
+        end;
+      end;
+    end;
+  end;
 end;
 
 end.
