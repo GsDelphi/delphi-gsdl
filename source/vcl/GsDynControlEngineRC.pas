@@ -24,19 +24,41 @@ unit GsDynControlEngineRC;
 interface
 
 uses
-  GsDynControlEngine, GsDynControlEngineIntf,
+  ActnList,
+  Buttons,
+  Classes,
+  ComCtrls,
+  Controls,
+  Dialogs,
+  ExtCtrls,
+  FileCtrl,
+  Forms,
+  Graphics,
+  GsDynControlEngine,
+  GsDynControlEngineIntf,
+  ImgList,
   JvDynControlEngineIntf,
-  {JvDynControlEngine, JvDynControlEngineIntf, JvDynControlEngineVCL,}
-  Classes, Controls, Graphics, Buttons, StdCtrls, ExtCtrls, Forms, ActnList,
-  ComCtrls, ImgList, Dialogs, FileCtrl,
-  { Raize Components Units }
-  RzCommon, RzEdit, RzBtnEdt, RzSpnEdt, RzPanel, RzRadChk, RzRadGrp, RzLstBox,
-  RzChkLst, RzCmboBx, RzLabel, RzButton, RzTreeVw, RzPrgres, RzTabs;
+  RzBtnEdt,
+  RzButton,
+  RzChkLst,
+  RzCmboBx,
+  RzCommon,
+  RzEdit,
+  RzLabel,
+  RzLstBox,
+  RzPanel,
+  RzPrgres,
+  RzRadChk,
+  RzRadGrp,
+  RzSpnEdt,
+  RzTabs,
+  RzTreeVw,
+  StdCtrls;
 
 const
   jctGSObjectEditor = TGSDynControlType('GSObjectEditorControl');
-  jctGSMaskEdit = TGSDynControlType('GSMaskEdit');
-  jctGSNumericEdit = TGSDynControlType('GSNumericEdit');
+  jctGSMaskEdit     = TGSDynControlType('GSMaskEdit');
+  jctGSNumericEdit  = TGSDynControlType('GSNumericEdit');
   (*
   jctGS = TJvDynControlType('GS');
   jctGS = TJvDynControlType('GS');
@@ -51,8 +73,11 @@ type
   protected
     procedure RegisterControls; override;
   public
-    function CreateControlClass(AControlClass: TGSControlClass; AOwner: TComponent; AParentControl: TWinControl; AControlName: String): TControl; override;
-    function IsControlTypeValid(const ADynControlType: TGSDynControlType; AControlClass: TGSControlClass): Boolean; override;
+    function CreateControlClass(AControlClass: TGSControlClass;
+      AOwner: TComponent; AParentControl: TWinControl; AControlName: string): TControl;
+      override;
+    function IsControlTypeValid(const ADynControlType: TGSDynControlType;
+      AControlClass: TGSControlClass): Boolean; override;
 
     (*
     function CreateLabelControl(AOwner: TComponent; AParentControl: TWinControl;
@@ -134,16 +159,18 @@ type
     *)
 
 
-    function CreateObjectEditorControl(AOwner: TComponent; AParentControl: TWinControl; const AControlName: String): TWinControl; virtual;
+    function CreateObjectEditorControl(AOwner: TComponent;
+      AParentControl: TWinControl; const AControlName: string): TWinControl; virtual;
   published
-    property FrameController: TRzFrameController read FFrameController write SetFrameController;
+    property FrameController: TRzFrameController
+      read FFrameController write SetFrameController;
   end;
 
 
   { Interfaces }
   IGSDynControlNumericEdit = interface
     ['{29C0460A-5ED5-4F68-ADA7-BC5A3E62E40F}']
-    procedure ControlSetDisplayFormat(Value: String);
+    procedure ControlSetDisplayFormat(Value: string);
     procedure ControlSetMinValue(Value: Extended);
     procedure ControlSetMaxValue(Value: Extended);
     procedure ControlSetIntegersOnly(Value: Boolean);
@@ -166,7 +193,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -179,7 +206,7 @@ type
 
     { IJvDynControlEdit }
     procedure ControlSetPasswordChar(Value: Char);
-    procedure ControlSetEditMask(const Value: String);
+    procedure ControlSetEditMask(const Value: string);
   end;
 
   TGSDynControlRCMaskEdit = class(TRzMaskEdit, IUnknown,
@@ -191,7 +218,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -204,7 +231,7 @@ type
 
     { IJvDynControlEdit }
     procedure ControlSetPasswordChar(Value: Char);
-    procedure ControlSetEditMask(const Value: String);
+    procedure ControlSetEditMask(const Value: string);
   end;
 
   TGSDynControlRCNumericEdit = class(TRzNumericEdit, IUnknown,
@@ -217,7 +244,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -229,7 +256,7 @@ type
     procedure ControlSetReadOnly(Value: Boolean);
 
     { IGSDynControlNumericEdit }
-    procedure ControlSetDisplayFormat(Value: String);
+    procedure ControlSetDisplayFormat(Value: string);
     procedure ControlSetMinValue(Value: Extended);
     procedure ControlSetMaxValue(Value: Extended);
     procedure ControlSetIntegersOnly(Value: Boolean);
@@ -246,7 +273,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -259,11 +286,11 @@ type
 
     { IJvDynControlEdit }
     procedure ControlSetPasswordChar(Value: Char);
-    procedure ControlSetEditMask(const Value: String);
+    procedure ControlSetEditMask(const Value: string);
 
     { IJvDynControlButtonEdit }
     procedure ControlSetOnButtonClick(Value: TNotifyEvent);
-    procedure ControlSetButtonCaption(const Value: String);
+    procedure ControlSetButtonCaption(const Value: string);
 
     { IJvDynControlButton }
     procedure ControlSetGlyph(Value: TBitmap);
@@ -286,7 +313,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -298,7 +325,7 @@ type
     procedure ControlSetReadOnly(Value: Boolean);
 
     { IGSDynControlNumericEdit }
-    procedure ControlSetDisplayFormat(Value: String);
+    procedure ControlSetDisplayFormat(Value: string);
     procedure ControlSetMinValue(Value: Extended);
     procedure ControlSetMaxValue(Value: Extended);
     procedure ControlSetIntegersOnly(Value: Boolean);
@@ -314,7 +341,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -336,13 +363,13 @@ type
     IJvDynControl, IJvDynControlData, IJvDynControlFileName,
     IJvDynControlReadOnly)
   private
-    FInitialDir: String;
-    FFilterIndex: Integer;
-    FFilter: String;
+    FInitialDir:    string;
+    FFilterIndex:   Integer;
+    FFilter:        string;
     FDialogOptions: TOpenOptions;
-    FDialogKind: TJvDynControlFileNameDialogKind;
-    FDialogTitle: String;
-    FDefaultExt: String;
+    FDialogKind:    TJvDynControlFileNameDialogKind;
+    FDialogTitle:   string;
+    FDefaultExt:    string;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -355,7 +382,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -367,11 +394,11 @@ type
     procedure ControlSetReadOnly(Value: Boolean);
 
     // IJvDynControlFileName
-    procedure ControlSetInitialDir(const Value: String);
-    procedure ControlSetDefaultExt(const Value: String);
-    procedure ControlSetDialogTitle(const Value: String);
+    procedure ControlSetInitialDir(const Value: string);
+    procedure ControlSetDefaultExt(const Value: string);
+    procedure ControlSetDialogTitle(const Value: string);
     procedure ControlSetDialogOptions(Value: TOpenOptions);
-    procedure ControlSetFilter(const Value: String);
+    procedure ControlSetFilter(const Value: string);
     procedure ControlSetFilterIndex(Value: Integer);
     procedure ControlSetDialogKind(Value: TJvDynControlFileNameDialogKind);
   end;
@@ -380,9 +407,9 @@ type
     IJvDynControl, IJvDynControlData, IJvDynControlDirectory,
     IJvDynControlReadOnly)
   private
-    FInitialDir: String;
+    FInitialDir:    string;
     FDialogOptions: TSelectDirOpts;
-    FDialogTitle: String;
+    FDialogTitle:   string;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -395,7 +422,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -408,11 +435,11 @@ type
 
     { IJvDynControlEdit }
     procedure ControlSetPasswordChar(Value: Char);
-    procedure ControlSetEditMask(const Value: String);
+    procedure ControlSetEditMask(const Value: string);
 
     // IJvDynControlDirectory
-    procedure ControlSetInitialDir(const Value: String);
-    procedure ControlSetDialogTitle(const Value: String);
+    procedure ControlSetInitialDir(const Value: string);
+    procedure ControlSetDialogTitle(const Value: string);
     procedure ControlSetDialogOptions(Value: TSelectDirOpts);
   end;
 
@@ -433,7 +460,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -447,7 +474,7 @@ type
     // IJvDynControlDate
     procedure ControlSetMinDate(Value: TDateTime);
     procedure ControlSetMaxDate(Value: TDateTime);
-    procedure ControlSetFormat(const Value: String);
+    procedure ControlSetFormat(const Value: string);
   end;
 
   TGSDynControlRCDateEdit = class(TRzDateTimeEdit, IUnknown,
@@ -459,7 +486,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -473,7 +500,7 @@ type
     // IJvDynControlDate
     procedure ControlSetMinDate(Value: TDateTime);
     procedure ControlSetMaxDate(Value: TDateTime);
-    procedure ControlSetFormat(const Value: String);
+    procedure ControlSetFormat(const Value: string);
   end;
 
   TGSDynControlRCTimeEdit = class(TRzDateTimeEdit, IUnknown,
@@ -485,7 +512,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -498,14 +525,15 @@ type
 
     { IJvDynControlEdit }
     procedure ControlSetPasswordChar(Value: Char);
-    procedure ControlSetEditMask(const Value: String);
+    procedure ControlSetEditMask(const Value: string);
 
-    {}
-    procedure ControlSetFormat(const Value: String);
+
+    procedure ControlSetFormat(const Value: string);
   end;
 
   TGSDynControlRCCheckBox = class(TRzCheckBox, IUnknown,
-    IJvDynControl, IJvDynControlCaption, IJvDynControlData, IJvDynControlCheckBox, IJvDynControlFont)
+    IJvDynControl, IJvDynControlCaption, IJvDynControlData,
+    IJvDynControlCheckBox, IJvDynControlFont)
   public
     { IJvDynControl }
     procedure ControlSetDefaultProperties;
@@ -513,7 +541,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -524,8 +552,8 @@ type
     { IJvDynControlReadOnly }
     procedure ControlSetReadOnly(Value: Boolean);
 
-    function ControlGetCaption: String;
-    procedure ControlSetCaption(const Value: String);
+    function ControlGetCaption: string;
+    procedure ControlSetCaption(const Value: string);
 
 
     //IJvDynControlCheckBox
@@ -548,7 +576,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -581,7 +609,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     { IJvDynControlData }
@@ -606,16 +634,16 @@ type
     IJvDynControl, IJvDynControlCaption, IJvDynControlData, IJvDynControlItems,
     IJvDynControlRadioGroup)
   public
-    function ControlGetCaption: String;
+    function ControlGetCaption: string;
     procedure ControlSetDefaultProperties;
-    procedure ControlSetCaption(const Value: String);
+    procedure ControlSetCaption(const Value: string);
     procedure ControlSetTabOrder(Value: Integer);
 
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnChange(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetValue(Value: Variant);
@@ -629,7 +657,8 @@ type
   end;
 
   TGSDynControlRCListBox = class(TRzListBox, IUnknown,
-    IJvDynControl, IJvDynControlData, IJvDynControlItems, IJvDynControlItemIndex, IJvDynControlDblClick)
+    IJvDynControl, IJvDynControlData, IJvDynControlItems, IJvDynControlItemIndex,
+    IJvDynControlDblClick)
   public
     function ControlGetItemIndex: Integer;
     procedure ControlSetDefaultProperties;
@@ -639,7 +668,7 @@ type
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnChange(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetValue(Value: Variant);
@@ -664,7 +693,7 @@ type
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnChange(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetValue(Value: Variant);
@@ -698,7 +727,7 @@ type
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnChange(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetValue(Value: Variant);
@@ -714,15 +743,15 @@ type
   TGSDynControlRCGroupBox = class(TRzGroupBox, IUnknown,
     IJvDynControl, IJvDynControlCaption)
   public
-    function ControlGetCaption: String;
+    function ControlGetCaption: string;
     procedure ControlSetDefaultProperties;
-    procedure ControlSetCaption(const Value: String);
+    procedure ControlSetCaption(const Value: string);
     procedure ControlSetTabOrder(Value: Integer);
 
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
   end;
 
@@ -731,15 +760,15 @@ type
     IJvDynControlAutoSize, IJvDynControlBevelBorder, IJvDynControlColor,
     IJvDynControlAlignment)
   public
-    function ControlGetCaption: String;
+    function ControlGetCaption: string;
     procedure ControlSetDefaultProperties;
-    procedure ControlSetCaption(const Value: String);
+    procedure ControlSetCaption(const Value: string);
     procedure ControlSetTabOrder(Value: Integer);
 
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetBorder(ABevelInner: TPanelBevel; ABevelOuter: TPanelBevel;
@@ -769,15 +798,15 @@ type
     IJvDynControlAutoSize, IJvDynControlColor,
     IJvDynControlAlignment, IJvDynControlFont)
   public
-    function ControlGetCaption: String;
+    function ControlGetCaption: string;
     procedure ControlSetDefaultProperties;
-    procedure ControlSetCaption(const Value: String);
+    procedure ControlSetCaption(const Value: string);
     procedure ControlSetTabOrder(Value: Integer);
 
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetFocusControl(Value: TWinControl);
@@ -802,17 +831,18 @@ type
   end;
 
   TGSDynControlRCButton = class(TRzBitBtn, IUnknown,
-    IJvDynControl, IJvDynControlCaption, IJvDynControlButton, IGSDynControlButton, IJvDynControlAction)
+    IJvDynControl, IJvDynControlCaption, IJvDynControlButton,
+    IGSDynControlButton, IJvDynControlAction)
   public
-    function ControlGetCaption: String;
+    function ControlGetCaption: string;
     procedure ControlSetDefaultProperties;
-    procedure ControlSetCaption(const Value: String);
+    procedure ControlSetCaption(const Value: string);
     procedure ControlSetTabOrder(Value: Integer);
 
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     procedure ControlSetGlyph(Value: TBitmap);
@@ -831,15 +861,15 @@ type
   TGSDynControlRCRadioButton = class(TRzRadioButton, IUnknown,
     IJvDynControl, IJvDynControlCaption, IJvDynControlData)
   public
-    function ControlGetCaption: String;
+    function ControlGetCaption: string;
     procedure ControlSetDefaultProperties;
-    procedure ControlSetCaption(const Value: String);
+    procedure ControlSetCaption(const Value: string);
     procedure ControlSetTabOrder(Value: Integer);
 
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     // IJvDynControlData
@@ -857,7 +887,7 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     // IJvDynControlReadOnly
@@ -897,8 +927,8 @@ type
     procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
     //IJvDynControlCaption
-    function ControlGetCaption: String;
-    procedure ControlSetCaption(const Value: String);
+    function ControlGetCaption: string;
+    procedure ControlSetCaption(const Value: string);
     //IJvDynControlAlign
     procedure ControlSetAlign(Value: TAlign);
     //IJvDynControlProgressBar
@@ -920,11 +950,11 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     //IJvDynControlTabControl
-    procedure ControlCreateTab(const AName: String);
+    procedure ControlCreateTab(const AName: string);
     procedure ControlSetOnChangeTab(OnChangeEvent: TNotifyEvent);
     procedure ControlSetOnChangingTab(OnChangingEvent: TTabChangingEvent);
     procedure ControlSetTabIndex(Index: Integer);
@@ -944,11 +974,11 @@ type
     procedure ControlSetOnEnter(Value: TNotifyEvent);
     procedure ControlSetOnExit(Value: TNotifyEvent);
     procedure ControlSetOnClick(Value: TNotifyEvent);
-    procedure ControlSetHint(const Value: String);
+    procedure ControlSetHint(const Value: string);
     procedure ControlSetAnchors(Value: TAnchors);
 
     //IJvDynControlTabControl
-    procedure ControlCreateTab(const AName: String);
+    procedure ControlCreateTab(const AName: string);
     procedure ControlSetOnChangeTab(OnChangeEvent: TNotifyEvent);
     procedure ControlSetOnChangingTab(OnChangingEvent: TTabChangingEvent);
     procedure ControlSetTabIndex(Index: Integer);
@@ -959,7 +989,7 @@ type
     procedure ControlSetRaggedRight(Value: Boolean);
 
     //IJvDynControlPageControl
-    function ControlGetPage(const PageName: String): TWinControl;
+    function ControlGetPage(const PageName: string): TWinControl;
   end;
 
   {$IFDEF DELPHI6_UP}
@@ -1013,7 +1043,11 @@ function DynControlEngineRC: TGSDynControlEngineRC;
 implementation
 
 uses
-  SysUtils, TypInfo, Mask, GSDynControlEngineVCL, BPLogging;
+  BPLogging,
+  GSDynControlEngineVCL,
+  Mask,
+  SysUtils,
+  TypInfo;
 
 var
   IntDynControlEngineRC: TGSDynControlEngineRC = nil;
@@ -1023,26 +1057,25 @@ begin
   Result := IntDynControlEngineRC;
 end;
 
-function TGSDynControlEngineRC.CreateControlClass(
-  AControlClass: TGSControlClass; AOwner: TComponent;
-  AParentControl: TWinControl; AControlName: String): TControl;
+function TGSDynControlEngineRC.CreateControlClass(AControlClass: TGSControlClass;
+  AOwner: TComponent; AParentControl: TWinControl; AControlName: string): TControl;
 begin
-  Result := inherited CreateControlClass(AControlClass, AOwner, AParentControl, AControlName);
+  Result := inherited CreateControlClass(AControlClass, AOwner,
+    AParentControl, AControlName);
 
   if Assigned(FrameController) and IsPublishedProp(Result, 'FrameController') then
     SetObjectProp(Result, 'FrameController', FrameController);
 end;
 
-function TGSDynControlEngineRC.CreateObjectEditorControl(
-  AOwner: TComponent; AParentControl: TWinControl;
-  const AControlName: string): TWinControl;
+function TGSDynControlEngineRC.CreateObjectEditorControl(AOwner: TComponent;
+  AParentControl: TWinControl; const AControlName: string): TWinControl;
 begin
-  Result := TWinControl(CreateControl(jctGSObjectEditor, AOwner, AParentControl, AControlName));
+  Result := TWinControl(CreateControl(jctGSObjectEditor, AOwner,
+    AParentControl, AControlName));
 end;
 
 function TGSDynControlEngineRC.IsControlTypeValid(
-  const ADynControlType: TGSDynControlType;
-  AControlClass: TGSControlClass): Boolean;
+  const ADynControlType: TGSDynControlType; AControlClass: TGSControlClass): Boolean;
 begin
   Result := inherited IsControlTypeValid(ADynControlType, AControlClass);
 
@@ -1050,8 +1083,7 @@ begin
   if (ADynControlType = jctGSObjectEditor) then
     Result := Result and Supports(AControlClass, IJvDynControlPanel);
   *)
-  if (ADynControlType = jctGSMaskEdit) or  
-     (ADynControlType = jctGSNumericEdit) then
+  if (ADynControlType = jctGSMaskEdit) or (ADynControlType = jctGSNumericEdit) then
     Result := Result and Supports(AControlClass, IJvDynControlData);
 
   if (ADynControlType = jctGSNumericEdit) then
@@ -1095,8 +1127,7 @@ begin
   {$ENDIF DELPHI6_UP}
 end;
 
-procedure TGSDynControlEngineRC.SetFrameController(
-  const Value: TRzFrameController);
+procedure TGSDynControlEngineRC.SetFrameController(const Value: TRzFrameController);
 begin
   FFrameController := Value;
 end;
@@ -1117,11 +1148,11 @@ procedure TGSDynControlRCEdit.ControlSetDefaultProperties;
 begin
 end;
 
-procedure TGSDynControlRCEdit.ControlSetEditMask(const Value: String);
+procedure TGSDynControlRCEdit.ControlSetEditMask(const Value: string);
 begin
 end;
 
-procedure TGSDynControlRCEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCEdit.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -1182,12 +1213,12 @@ procedure TGSDynControlRCMaskEdit.ControlSetDefaultProperties;
 begin
 end;
 
-procedure TGSDynControlRCMaskEdit.ControlSetEditMask(const Value: String);
+procedure TGSDynControlRCMaskEdit.ControlSetEditMask(const Value: string);
 begin
   EditMask := Value;
 end;
 
-procedure TGSDynControlRCMaskEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCMaskEdit.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -1256,19 +1287,17 @@ procedure TGSDynControlRCNumericEdit.ControlSetDefaultProperties;
 begin
 end;
 
-procedure TGSDynControlRCNumericEdit.ControlSetDisplayFormat(
-  Value: String);
+procedure TGSDynControlRCNumericEdit.ControlSetDisplayFormat(Value: string);
 begin
   DisplayFormat := Value;
 end;
 
-procedure TGSDynControlRCNumericEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCNumericEdit.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
 
-procedure TGSDynControlRCNumericEdit.ControlSetIntegersOnly(
-  Value: Boolean);
+procedure TGSDynControlRCNumericEdit.ControlSetIntegersOnly(Value: Boolean);
 begin
   IntegersOnly := Value;
 end;
@@ -1283,20 +1312,17 @@ begin
   Min := Value;
 end;
 
-procedure TGSDynControlRCNumericEdit.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCNumericEdit.ControlSetOnChange(Value: TNotifyEvent);
 begin
   OnChange := Value;
 end;
 
-procedure TGSDynControlRCNumericEdit.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCNumericEdit.ControlSetOnClick(Value: TNotifyEvent);
 begin
   OnClick := Value;
 end;
 
-procedure TGSDynControlRCNumericEdit.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCNumericEdit.ControlSetOnEnter(Value: TNotifyEvent);
 begin
   OnEnter := Value;
 end;
@@ -1336,14 +1362,12 @@ begin
   Anchors := Value;
 end;
 
-procedure TGSDynControlRCButtonEdit.ControlSetButtonCaption(
-  const Value: String);
+procedure TGSDynControlRCButtonEdit.ControlSetButtonCaption(const Value: string);
 begin
   Button.Caption := Value;
 end;
 
-procedure TGSDynControlRCButtonEdit.ControlSetButtonKind(
-  Value: TButtonKind);
+procedure TGSDynControlRCButtonEdit.ControlSetButtonKind(Value: TButtonKind);
 begin
   ButtonKind := Value;
 end;
@@ -1360,8 +1384,7 @@ procedure TGSDynControlRCButtonEdit.ControlSetDefaultProperties;
 begin
 end;
 
-procedure TGSDynControlRCButtonEdit.ControlSetEditMask(
-  const Value: String);
+procedure TGSDynControlRCButtonEdit.ControlSetEditMask(const Value: string);
 begin
 end;
 
@@ -1370,7 +1393,7 @@ begin
   ButtonGlyph.Assign(Value);
 end;
 
-procedure TGSDynControlRCButtonEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCButtonEdit.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -1384,14 +1407,12 @@ begin
   ButtonNumGlyphs := Value;
 end;
 
-procedure TGSDynControlRCButtonEdit.ControlSetOnButtonClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCButtonEdit.ControlSetOnButtonClick(Value: TNotifyEvent);
 begin
   OnButtonClick := Value;
 end;
 
-procedure TGSDynControlRCButtonEdit.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCButtonEdit.ControlSetOnChange(Value: TNotifyEvent);
 begin
   OnChange := Value;
 end;
@@ -1457,12 +1478,12 @@ begin
   IntegersOnly := False;
 end;
 
-procedure TGSDynControlRCCalcEdit.ControlSetDisplayFormat(Value: String);
+procedure TGSDynControlRCCalcEdit.ControlSetDisplayFormat(Value: string);
 begin
   DisplayFormat := Value;
 end;
 
-procedure TGSDynControlRCCalcEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCCalcEdit.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -1537,7 +1558,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCSpinEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCSpinEdit.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -1609,8 +1630,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetDefaultExt(
-  const Value: String);
+procedure TGSDynControlRCFileNameEdit.ControlSetDefaultExt(const Value: string);
 begin
 
 end;
@@ -1626,61 +1646,52 @@ begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetDialogOptions(
-  Value: TOpenOptions);
+procedure TGSDynControlRCFileNameEdit.ControlSetDialogOptions(Value: TOpenOptions);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetDialogTitle(
-  const Value: String);
+procedure TGSDynControlRCFileNameEdit.ControlSetDialogTitle(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetFilter(
-  const Value: String);
+procedure TGSDynControlRCFileNameEdit.ControlSetFilter(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetFilterIndex(
-  Value: Integer);
+procedure TGSDynControlRCFileNameEdit.ControlSetFilterIndex(Value: Integer);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCFileNameEdit.ControlSetHint(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetInitialDir(
-  const Value: String);
+procedure TGSDynControlRCFileNameEdit.ControlSetInitialDir(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCFileNameEdit.ControlSetOnChange(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCFileNameEdit.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCFileNameEdit.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.ControlSetOnExit(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCFileNameEdit.ControlSetOnExit(Value: TNotifyEvent);
 begin
 
 end;
@@ -1706,8 +1717,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCFileNameEdit.DefaultOnButtonClick(
-  Sender: TObject);
+procedure TGSDynControlRCFileNameEdit.DefaultOnButtonClick(Sender: TObject);
 begin
 
 end;
@@ -1735,55 +1745,47 @@ begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetDialogOptions(
-  Value: TSelectDirOpts);
+procedure TGSDynControlRCDirectoryEdit.ControlSetDialogOptions(Value: TSelectDirOpts);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetDialogTitle(
-  const Value: String);
+procedure TGSDynControlRCDirectoryEdit.ControlSetDialogTitle(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetEditMask(
-  const Value: String);
+procedure TGSDynControlRCDirectoryEdit.ControlSetEditMask(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCDirectoryEdit.ControlSetHint(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetInitialDir(
-  const Value: String);
+procedure TGSDynControlRCDirectoryEdit.ControlSetInitialDir(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDirectoryEdit.ControlSetOnChange(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDirectoryEdit.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDirectoryEdit.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.ControlSetOnExit(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDirectoryEdit.ControlSetOnExit(Value: TNotifyEvent);
 begin
 
 end;
@@ -1814,8 +1816,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCDirectoryEdit.DefaultOnButtonClick(
-  Sender: TObject);
+procedure TGSDynControlRCDirectoryEdit.DefaultOnButtonClick(Sender: TObject);
 begin
 
 end;
@@ -1848,13 +1849,12 @@ begin
 
 end;
 
-procedure TGSDynControlRCDateTimeEdit.ControlSetFormat(
-  const Value: String);
+procedure TGSDynControlRCDateTimeEdit.ControlSetFormat(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCDateTimeEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCDateTimeEdit.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -1869,26 +1869,22 @@ begin
 
 end;
 
-procedure TGSDynControlRCDateTimeEdit.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDateTimeEdit.ControlSetOnChange(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCDateTimeEdit.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDateTimeEdit.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCDateTimeEdit.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDateTimeEdit.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCDateTimeEdit.ControlSetOnExit(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCDateTimeEdit.ControlSetOnExit(Value: TNotifyEvent);
 begin
 
 end;
@@ -1937,12 +1933,12 @@ begin
 
 end;
 
-procedure TGSDynControlRCDateEdit.ControlSetFormat(const Value: String);
+procedure TGSDynControlRCDateEdit.ControlSetFormat(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCDateEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCDateEdit.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2009,17 +2005,17 @@ begin
 
 end;
 
-procedure TGSDynControlRCTimeEdit.ControlSetEditMask(const Value: String);
+procedure TGSDynControlRCTimeEdit.ControlSetEditMask(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCTimeEdit.ControlSetFormat(const Value: String);
+procedure TGSDynControlRCTimeEdit.ControlSetFormat(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCTimeEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCTimeEdit.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2066,7 +2062,7 @@ end;
 
 { TGSDynControlRCCheckBox }
 
-function TGSDynControlRCCheckBox.ControlGetCaption: String;
+function TGSDynControlRCCheckBox.ControlGetCaption: string;
 begin
 
 end;
@@ -2096,7 +2092,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCCheckBox.ControlSetCaption(const Value: String);
+procedure TGSDynControlRCCheckBox.ControlSetCaption(const Value: string);
 begin
 
 end;
@@ -2111,7 +2107,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCCheckBox.ControlSetHint(const Value: String);
+procedure TGSDynControlRCCheckBox.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2183,7 +2179,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCMemo.ControlSetHint(const Value: String);
+procedure TGSDynControlRCMemo.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2275,7 +2271,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCRichEdit.ControlSetHint(const Value: String);
+procedure TGSDynControlRCRichEdit.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2310,8 +2306,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCRichEdit.ControlSetScrollBars(
-  Value: TScrollStyle);
+procedure TGSDynControlRCRichEdit.ControlSetScrollBars(Value: TScrollStyle);
 begin
 
 end;
@@ -2348,7 +2343,7 @@ end;
 
 { TGSDynControlRCRadioGroup }
 
-function TGSDynControlRCRadioGroup.ControlGetCaption: String;
+function TGSDynControlRCRadioGroup.ControlGetCaption: string;
 begin
 
 end;
@@ -2368,7 +2363,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCRadioGroup.ControlSetCaption(const Value: String);
+procedure TGSDynControlRCRadioGroup.ControlSetCaption(const Value: string);
 begin
 
 end;
@@ -2383,7 +2378,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCRadioGroup.ControlSetHint(const Value: String);
+procedure TGSDynControlRCRadioGroup.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2393,8 +2388,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCRadioGroup.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCRadioGroup.ControlSetOnChange(Value: TNotifyEvent);
 begin
 
 end;
@@ -2456,7 +2450,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCListBox.ControlSetHint(const Value: String);
+procedure TGSDynControlRCListBox.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2513,20 +2507,17 @@ end;
 
 { TGSDynControlRCCheckListBox }
 
-function TGSDynControlRCCheckListBox.ControlGetChecked(
-  Index: Integer): Boolean;
+function TGSDynControlRCCheckListBox.ControlGetChecked(Index: Integer): Boolean;
 begin
 
 end;
 
-function TGSDynControlRCCheckListBox.ControlGetHeader(
-  Index: Integer): Boolean;
+function TGSDynControlRCCheckListBox.ControlGetHeader(Index: Integer): Boolean;
 begin
 
 end;
 
-function TGSDynControlRCCheckListBox.ControlGetItemEnabled(
-  Index: Integer): Boolean;
+function TGSDynControlRCCheckListBox.ControlGetItemEnabled(Index: Integer): Boolean;
 begin
 
 end;
@@ -2536,8 +2527,7 @@ begin
 
 end;
 
-function TGSDynControlRCCheckListBox.ControlGetState(
-  Index: Integer): TCheckBoxState;
+function TGSDynControlRCCheckListBox.ControlGetState(Index: Integer): TCheckBoxState;
 begin
 
 end;
@@ -2547,8 +2537,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetAllowGrayed(
-  Value: Boolean);
+procedure TGSDynControlRCCheckListBox.ControlSetAllowGrayed(Value: Boolean);
 begin
 
 end;
@@ -2558,8 +2547,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetChecked(Index: Integer;
-  Value: Boolean);
+procedure TGSDynControlRCCheckListBox.ControlSetChecked(Index: Integer; Value: Boolean);
 begin
 
 end;
@@ -2569,13 +2557,12 @@ begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetHeader(Index: Integer;
-  Value: Boolean);
+procedure TGSDynControlRCCheckListBox.ControlSetHeader(Index: Integer; Value: Boolean);
 begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetHint(const Value: String);
+procedure TGSDynControlRCCheckListBox.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2591,32 +2578,27 @@ begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCCheckListBox.ControlSetOnChange(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCCheckListBox.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetOnDblClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCCheckListBox.ControlSetOnDblClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCCheckListBox.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCCheckListBox.ControlSetOnExit(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCCheckListBox.ControlSetOnExit(Value: TNotifyEvent);
 begin
 
 end;
@@ -2664,7 +2646,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCComboBox.ControlSetHint(const Value: String);
+procedure TGSDynControlRCComboBox.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2674,8 +2656,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCComboBox.ControlSetNewEntriesAllowed(
-  Value: Boolean);
+procedure TGSDynControlRCComboBox.ControlSetNewEntriesAllowed(Value: Boolean);
 begin
 
 end;
@@ -2717,7 +2698,7 @@ end;
 
 { TGSDynControlRCGroupBox }
 
-function TGSDynControlRCGroupBox.ControlGetCaption: String;
+function TGSDynControlRCGroupBox.ControlGetCaption: string;
 begin
 
 end;
@@ -2727,7 +2708,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCGroupBox.ControlSetCaption(const Value: String);
+procedure TGSDynControlRCGroupBox.ControlSetCaption(const Value: string);
 begin
 
 end;
@@ -2737,7 +2718,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCGroupBox.ControlSetHint(const Value: String);
+procedure TGSDynControlRCGroupBox.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -2764,7 +2745,7 @@ end;
 
 { TGSDynControlRCPanel }
 
-function TGSDynControlRCPanel.ControlGetCaption: String;
+function TGSDynControlRCPanel.ControlGetCaption: string;
 begin
   Result := Caption;
 end;
@@ -2804,15 +2785,14 @@ begin
   BevelOuter := Value;
 end;
 
-procedure TGSDynControlRCPanel.ControlSetBorder(ABevelInner,
-  ABevelOuter: TPanelBevel; ABevelWidth: Integer;
-  ABorderStyle: TBorderStyle; ABorderWidth: Integer);
+procedure TGSDynControlRCPanel.ControlSetBorder(ABevelInner, ABevelOuter: TPanelBevel;
+  ABevelWidth: Integer; ABorderStyle: TBorderStyle; ABorderWidth: Integer);
 begin
   BorderWidth := ABorderWidth;
   BorderStyle := ABorderStyle;
-  BevelInner := ABevelInner;
-  BevelOuter := ABevelOuter;
-  BevelWidth := ABevelWidth;
+  BevelInner  := ABevelInner;
+  BevelOuter  := ABevelOuter;
+  BevelWidth  := ABevelWidth;
 end;
 
 procedure TGSDynControlRCPanel.ControlSetBorderStyle(Value: TBorderStyle);
@@ -2825,7 +2805,7 @@ begin
   BorderWidth := Value;
 end;
 
-procedure TGSDynControlRCPanel.ControlSetCaption(const Value: String);
+procedure TGSDynControlRCPanel.ControlSetCaption(const Value: string);
 begin
   Caption := Value;
 end;
@@ -2837,13 +2817,13 @@ end;
 
 procedure TGSDynControlRCPanel.ControlSetDefaultProperties;
 begin
-  BevelInner := bvNone;
-  BevelOuter := bvNone;
+  BevelInner  := bvNone;
+  BevelOuter  := bvNone;
   BorderInner := fsNone;
   BorderOuter := fsNone;
 end;
 
-procedure TGSDynControlRCPanel.ControlSetHint(const Value: String);
+procedure TGSDynControlRCPanel.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -2875,7 +2855,7 @@ end;
 
 { TGSDynControlRCLabel }
 
-function TGSDynControlRCLabel.ControlGetCaption: String;
+function TGSDynControlRCLabel.ControlGetCaption: string;
 begin
   Result := Caption;
 end;
@@ -2905,7 +2885,7 @@ begin
   AutoSize := Value;
 end;
 
-procedure TGSDynControlRCLabel.ControlSetCaption(const Value: String);
+procedure TGSDynControlRCLabel.ControlSetCaption(const Value: string);
 begin
   if Caption <> Value then
     Caption := Value;
@@ -2931,7 +2911,7 @@ begin
   Font.Assign(Value);
 end;
 
-procedure TGSDynControlRCLabel.ControlSetHint(const Value: String);
+procedure TGSDynControlRCLabel.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -2964,7 +2944,7 @@ end;
 
 { TGSDynControlRCButton }
 
-function TGSDynControlRCButton.ControlGetCaption: String;
+function TGSDynControlRCButton.ControlGetCaption: string;
 begin
   Result := Caption;
 end;
@@ -2984,7 +2964,7 @@ begin
   Cancel := Value;
 end;
 
-procedure TGSDynControlRCButton.ControlSetCaption(const Value: String);
+procedure TGSDynControlRCButton.ControlSetCaption(const Value: string);
 begin
   if Caption <> Value then
     Caption := Value;
@@ -3004,7 +2984,7 @@ begin
   Glyph.Assign(Value);
 end;
 
-procedure TGSDynControlRCButton.ControlSetHint(const Value: String);
+procedure TGSDynControlRCButton.ControlSetHint(const Value: string);
 begin
   Hint := Value;
 end;
@@ -3043,7 +3023,7 @@ end;
 
 { TGSDynControlRCRadioButton }
 
-function TGSDynControlRCRadioButton.ControlGetCaption: String;
+function TGSDynControlRCRadioButton.ControlGetCaption: string;
 begin
 
 end;
@@ -3058,8 +3038,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCRadioButton.ControlSetCaption(
-  const Value: String);
+procedure TGSDynControlRCRadioButton.ControlSetCaption(const Value: string);
 begin
 
 end;
@@ -3069,25 +3048,22 @@ begin
 
 end;
 
-procedure TGSDynControlRCRadioButton.ControlSetHint(const Value: String);
+procedure TGSDynControlRCRadioButton.ControlSetHint(const Value: string);
 begin
 
 end;
 
-procedure TGSDynControlRCRadioButton.ControlSetOnChange(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCRadioButton.ControlSetOnChange(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCRadioButton.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCRadioButton.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCRadioButton.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCRadioButton.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
@@ -3134,7 +3110,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetHint(const Value: String);
+procedure TGSDynControlRCTreeView.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -3144,8 +3120,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetImages(
-  Value: TCustomImageList);
+procedure TGSDynControlRCTreeView.ControlSetImages(Value: TCustomImageList);
 begin
 
 end;
@@ -3155,14 +3130,12 @@ begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetOnChange(
-  Value: TTVChangedEvent);
+procedure TGSDynControlRCTreeView.ControlSetOnChange(Value: TTVChangedEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetOnChanging(
-  Value: TTVChangingEvent);
+procedure TGSDynControlRCTreeView.ControlSetOnChanging(Value: TTVChangingEvent);
 begin
 
 end;
@@ -3172,8 +3145,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetOnDblClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCTreeView.ControlSetOnDblClick(Value: TNotifyEvent);
 begin
 
 end;
@@ -3193,8 +3165,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetSelected(
-  const Value: TTreeNode);
+procedure TGSDynControlRCTreeView.ControlSetSelected(const Value: TTreeNode);
 begin
 
 end;
@@ -3219,8 +3190,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTreeView.ControlSetStateImages(
-  Value: TCustomImageList);
+procedure TGSDynControlRCTreeView.ControlSetStateImages(Value: TCustomImageList);
 begin
 
 end;
@@ -3242,7 +3212,7 @@ end;
 
 { TGSDynControlRCProgressBar }
 
-function TGSDynControlRCProgressBar.ControlGetCaption: String;
+function TGSDynControlRCProgressBar.ControlGetCaption: string;
 begin
 
 end;
@@ -3257,8 +3227,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCProgressBar.ControlSetCaption(
-  const Value: String);
+procedure TGSDynControlRCProgressBar.ControlSetCaption(const Value: string);
 begin
 
 end;
@@ -3268,7 +3237,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCProgressBar.ControlSetHint(const Value: String);
+procedure TGSDynControlRCProgressBar.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -3288,14 +3257,12 @@ begin
 
 end;
 
-procedure TGSDynControlRCProgressBar.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCProgressBar.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCProgressBar.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCProgressBar.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
@@ -3333,7 +3300,7 @@ end;
 
 { TGSDynControlRCTabControl }
 
-procedure TGSDynControlRCTabControl.ControlCreateTab(const AName: String);
+procedure TGSDynControlRCTabControl.ControlCreateTab(const AName: string);
 begin
 
 end;
@@ -3353,7 +3320,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTabControl.ControlSetHint(const Value: String);
+procedure TGSDynControlRCTabControl.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -3368,8 +3335,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTabControl.ControlSetOnChangeTab(
-  OnChangeEvent: TNotifyEvent);
+procedure TGSDynControlRCTabControl.ControlSetOnChangeTab(OnChangeEvent: TNotifyEvent);
 begin
 
 end;
@@ -3400,8 +3366,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCTabControl.ControlSetScrollOpposite(
-  Value: Boolean);
+procedure TGSDynControlRCTabControl.ControlSetScrollOpposite(Value: Boolean);
 begin
 
 end;
@@ -3418,13 +3383,13 @@ end;
 
 { TGSDynControlRCPageControl }
 
-procedure TGSDynControlRCPageControl.ControlCreateTab(const AName: String);
+procedure TGSDynControlRCPageControl.ControlCreateTab(const AName: string);
 begin
 
 end;
 
 function TGSDynControlRCPageControl.ControlGetPage(
-  const PageName: String): TWinControl;
+  const PageName: string): TWinControl;
 begin
 
 end;
@@ -3444,7 +3409,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCPageControl.ControlSetHint(const Value: String);
+procedure TGSDynControlRCPageControl.ControlSetHint(const Value: string);
 begin
 
 end;
@@ -3471,14 +3436,12 @@ begin
 
 end;
 
-procedure TGSDynControlRCPageControl.ControlSetOnClick(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCPageControl.ControlSetOnClick(Value: TNotifyEvent);
 begin
 
 end;
 
-procedure TGSDynControlRCPageControl.ControlSetOnEnter(
-  Value: TNotifyEvent);
+procedure TGSDynControlRCPageControl.ControlSetOnEnter(Value: TNotifyEvent);
 begin
 
 end;
@@ -3493,8 +3456,7 @@ begin
 
 end;
 
-procedure TGSDynControlRCPageControl.ControlSetScrollOpposite(
-  Value: Boolean);
+procedure TGSDynControlRCPageControl.ControlSetScrollOpposite(Value: Boolean);
 begin
 
 end;
@@ -3604,6 +3566,7 @@ initialization
   SetDefaultDynControlEngine(IntDynControlEngineRC);
 
   BPC_CodeSite.ExitInitialization('GSDynControlEngineRC');
+
 finalization
   BPC_CodeSite.EnterFinalization('GSDynControlEngineRC');
 
