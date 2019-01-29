@@ -355,7 +355,9 @@ var
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'DoUpdate');{$ENDIF}
 
-  if (ComDBOpen(ComDB) = LONG(ERROR_SUCCESS)) then
+  DBError := ComDBOpen(ComDB);
+
+  if (DBError = LONG(ERROR_SUCCESS)) then
   begin
     { get size of com db port usage }
     Buf := nil;
