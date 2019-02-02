@@ -23,8 +23,8 @@ type
 
   TestTGsTemplateProcessor = class(TTestCase)
   strict private
-    FGsTemplateProcessor: TGsTemplateProcessor;
-    FProperties:          TObject;
+    //FGsTemplateProcessor: TGsTemplateProcessor;
+    FProperties: TObject;
   protected
     procedure DoTest(Expected, Template: string);
   public
@@ -36,6 +36,7 @@ type
     procedure TestProcessFormat;
     procedure TestProcessMulti;
     procedure TestProcessRanges;
+    procedure TestExtractMarkers;
   end;
 
 implementation
@@ -86,6 +87,13 @@ type
     FTestByte1: Byte;
     FTestAnsiString1: AnsiString;
     FTestCurrency: Currency;
+    FUnicodeString1: UnicodeString;
+    FVariant1: Variant;
+    FShortString1: ShortString;
+    FAnsiChar1: AnsiChar;
+    FWideString1: WideString;
+    FWideChar1: WideChar;
+    FAnsiString1: AnsiString;
   published
     { Enum tests }
     (*
@@ -126,7 +134,94 @@ type
     property TestByte1: Byte read FTestByte1 write FTestByte1;
     property TestInteger1: Integer read FTestInteger1 write FTestInteger1;
 
+    property AnsiChar1: AnsiChar read FAnsiChar1;
+    property WideChar1: WideChar read FWideChar1;
+    property ShortString1: ShortString read FShortString1;
+    property AnsiString1: AnsiString read FAnsiString1;
+    property WideString1: WideString read FWideString1;
+    property UnicodeString1: UnicodeString read FUnicodeString1;
+    property Variant1: Variant read FVariant1;
   end;
+
+  TTestMarkersObj2 = class(TPersistent)
+  private
+    FValue3: Integer;
+  published
+    property Value3: Integer read FValue3;
+  end;
+
+  TTestMarkersObj1 = class(TPersistent)
+  private
+    FValue2:  Integer;
+    FObject2: TTestMarkersObj2;
+  public
+    constructor Create;
+    destructor Destroy; override;
+  published
+    property Value2: Integer read FValue2;
+    property Object2: TTestMarkersObj2 read FObject2;
+  end;
+
+  TTestMarkers = class(TPersistent)
+  private
+    FValue1:  Integer;
+    FObject1: TTestMarkersObj1;
+    FUnicodeString1: UnicodeString;
+    FVariant1: Variant;
+    FShortString1: ShortString;
+    FAnsiChar1: AnsiChar;
+    FWideString1: WideString;
+    FWideChar1: WideChar;
+    FAnsiString1: AnsiString;
+  public
+    constructor Create;
+    destructor Destroy; override;
+  published
+    property Value1: Integer read FValue1;
+    property Object1: TTestMarkersObj1 read FObject1;
+
+    property AnsiChar1: AnsiChar read FAnsiChar1;
+    property WideChar1: WideChar read FWideChar1;
+    property ShortString1: ShortString read FShortString1;
+    property AnsiString1: AnsiString read FAnsiString1;
+    property WideString1: WideString read FWideString1;
+    property UnicodeString1: UnicodeString read FUnicodeString1;
+    property Variant1: Variant read FVariant1;
+  end;
+
+{ TTestMarkersObj1 }
+
+constructor TTestMarkersObj1.Create;
+begin
+  inherited Create;
+
+  FValue2  := 145;
+  FObject2 := TTestMarkersObj2.Create;
+end;
+
+destructor TTestMarkersObj1.Destroy;
+begin
+  FObject2.Free;
+
+  inherited;
+end;
+
+{ TTestMarkers }
+
+constructor TTestMarkers.Create;
+begin
+  inherited Create;
+
+  FValue1  := 133;
+  FObject1 := TTestMarkersObj1.Create;
+end;
+
+destructor TTestMarkers.Destroy;
+begin
+  FObject1.Free;
+
+  inherited;
+end;
 
 { TestTGsTemplateProcessor }
 
@@ -144,7 +239,7 @@ begin
 
   with TTestProperties(FProperties) do
   begin
-    TestString1 := 'Abcdefg Hijklmnop';
+    TestString1  := 'Abcdefg Hijklmnop';
     TestInteger1 := 1234567890;
 
     TestDateTime := Now;
@@ -160,6 +255,29 @@ begin
 
   //FGsTemplateProcessor.Free;
   //FGsTemplateProcessor := nil;
+end;
+
+procedure TestTGsTemplateProcessor.TestExtractMarkers;
+var
+  Strs: TStrings;
+  Obj:  TTestMarkers;
+begin
+  Obj := TTestMarkers.Create;
+
+  try
+    Strs := TGsTemplateProcessor.ExtractMarkers(Obj);
+
+    try
+      CheckNotNull(Strs);
+      CheckEqualsString(
+        '"%Value1% | %Value1(Format)%","%Object1.Value2% | %Object1.Value2(Format)%","%Object1.Object2.Value3% | %Object1.Object2.Value3(Format)%",%AnsiChar1%,%WideChar1%,%ShortString1%,%AnsiString1%,%WideString1%,%UnicodeString1%,%Variant1%',
+        Strs.CommaText);
+    finally
+      Strs.Free;
+    end;
+  finally
+    Obj.Free;
+  end;
 end;
 
 procedure TestTGsTemplateProcessor.TestProcess;
@@ -282,3 +400,4 @@ initialization
   // Alle Testfälle beim Testprogramm registrieren
   RegisterTest(TestTGsTemplateProcessor.Suite);
 end.
+
