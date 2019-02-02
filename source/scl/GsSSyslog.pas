@@ -7,6 +7,7 @@ interface
 uses
   BPSettings,
   BPSettingsEditorIntf,
+  Classes,
   GsSyslog,
   {$IFDEF HAS_UNIT_SYSTEM_UITYPES}UITypes{$ELSE}ImgList{$ENDIF};
 
@@ -35,6 +36,9 @@ type
       virtual;
     constructor Create(AOwner: TCustomBPSettings; AName: string;
       CaptionRes, HintRes: PResStringRec; AImageIndex: TImageIndex = -1); override;
+
+    { TPersistent }
+    procedure Assign(Source: TPersistent); override;
   published
     property Value: TGsSyslogMessageSeverity read GetValue write SetValue;
     property DefaultValue: TGsSyslogMessageSeverity
@@ -44,6 +48,18 @@ type
 implementation
 
 { TGsSPLoggingLevel }
+
+procedure TGsSPLoggingLevel.Assign(Source: TPersistent);
+begin
+  inherited;
+
+  if Source is TGsSPLoggingLevel then
+    with TGsSPLoggingLevel(Source) do
+    begin
+      Self.FValue := FValue;
+      Self.FDefaultValue := FDefaultValue;
+    end;
+end;
 
 constructor TGsSPLoggingLevel.Create(AOwner: TCustomBPSettings;
   AName: string; CaptionRes, HintRes: PResStringRec; AImageIndex: TImageIndex);
