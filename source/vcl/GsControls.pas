@@ -70,13 +70,6 @@ type
     FList:           TList;
     FOnChange:       TNotifyEvent;
     FEventsDisabled: Boolean;
-  protected
-    procedure Loaded; override;
-
-    procedure ChainEvents; dynamic;
-    procedure UnchainEvents; dynamic;
-    procedure Change(Sender: TObject);
-
     procedure NotifyEvent(EventID: TEventID; Sender: TObject);
     procedure NotifyEvent0(Sender: TObject);
     procedure NotifyEvent1(Sender: TObject);
@@ -88,15 +81,24 @@ type
     procedure NotifyEvent7(Sender: TObject);
     procedure NotifyEvent8(Sender: TObject);
     procedure NotifyEvent9(Sender: TObject);
-
     procedure IndexChangingEvent(Sender: TObject; NewIndex: Integer;
       var AllowChange: Boolean);
+  protected
+    { TComponent }
+    procedure Loaded; override;
+    procedure Notification(AComponent: TComponent;  Operation: TOperation); override;
+
+    { Methods }
+    procedure ChainEvents; dynamic;
+    procedure UnchainEvents; dynamic;
+
+    procedure DoChange(Sender: TObject);
 
     function AddEvent: PNotifyEventRec;
 
-    procedure RegisterEvent(AControl: TControl; EventID: TEventID;
-      Event: TNotifyEvent); overload;
-    procedure RegisterEvent(AControl: TControl; Event: TRzIndexChangingEvent);
+    procedure RegisterEvent(AControl: TControl; AEventID: TEventID;
+      AEvent: TNotifyEvent); overload;
+    procedure RegisterEvent(AControl: TControl; AEvent: TRzIndexChangingEvent);
       overload;
   public
     constructor Create(AOwner: TComponent); overload; override;
@@ -540,7 +542,7 @@ begin
         // |- TCustomLabel
 
         if not (Components[I] is TRzCustomRadioGroup) and not
-          (Components[I] is TRzCustomCheckGroup) and
+          (Components[I] is TRzCustomCheckGroup) and not (Components[I] is TRzCustomCheckBox) and
           ((Components[I] is TCustomMultiSelectListControl) or
           (Components[I] is TCustomPanel) or (Components[I] is TCustomLabel) or
           (Components[I] is TRzSpacer) or (Components[I] is TRzToolButton) or
@@ -611,12 +613,6 @@ begin
   end;
 end;
 
-procedure TGsChangeNotifier.Change(Sender: TObject);
-begin
-  if Assigned(FOnChange) then
-    FOnChange(Sender);
-end;
-
 constructor TGsChangeNotifier.Create(AOwner: TComponent);
 begin
   inherited;
@@ -644,6 +640,12 @@ begin
   FEventsDisabled := True;
 end;
 
+procedure TGsChangeNotifier.DoChange(Sender: TObject);
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Sender);
+end;
+
 procedure TGsChangeNotifier.EnableEvents;
 begin
   FEventsDisabled := False;
@@ -661,7 +663,7 @@ begin
       if (PNotifyEventRec(FList.Items[I])^.Control = Sender) and
         (PNotifyEventRec(FList.Items[I])^.EventType = etIndexChanging) then
       begin
-        Change(Sender);
+        DoChange(Sender);
 
         if @PNotifyEventRec(FList.Items[I])^.IndexChangingEvent <> nil then
           PNotifyEventRec(FList.Items[I])^.IndexChangingEvent(Sender, NewIndex,
@@ -688,6 +690,30 @@ begin
   end;
 end;
 
+procedure TGsChangeNotifier.Notification(AComponent: TComponent;
+  Operation: TOperation);
+var
+  I: Integer;
+begin
+  if (Operation = opRemove) then
+  begin
+    I := 0;
+
+    while I < FList.Count do
+    begin
+      if (PNotifyEventRec(FList.Items[I])^.Control = AComponent) then
+      begin
+        Dispose(PNotifyEventRec(FList.Items[I]));
+        FList.Delete(I);
+      end
+      else
+        Inc(I);
+    end;
+  end;
+
+  inherited;
+end;
+
 procedure TGsChangeNotifier.NotifyEvent(EventID: TEventID; Sender: TObject);
 var
   I: Integer;
@@ -700,7 +726,7 @@ begin
         (PNotifyEventRec(FList.Items[I])^.EventType = etNotify) and
         (PNotifyEventRec(FList.Items[I])^.EventID = EventID) then
       begin
-        Change(Sender);
+        DoChange(Sender);
 
         if @PNotifyEventRec(FList.Items[I])^.NotifyEvent <> nil then
           PNotifyEventRec(FList.Items[I])^.NotifyEvent(Sender);
@@ -762,27 +788,29 @@ begin
 end;
 
 procedure TGsChangeNotifier.RegisterEvent(AControl: TControl;
-  EventID: TEventID; Event: TNotifyEvent);
+  AEventID: TEventID; AEvent: TNotifyEvent);
 begin
   with AddEvent^ do
   begin
     Control := AControl;
-    EventID := EventID;
+    EventID := AEventID;
     EventType := etNotify;
-    NotifyEvent := Event;
+    NotifyEvent := AEvent;
   end;
 end;
 
 procedure TGsChangeNotifier.RegisterEvent(AControl: TControl;
-  Event: TRzIndexChangingEvent);
+  AEvent: TRzIndexChangingEvent);
 begin
   with AddEvent^ do
   begin
     Control := AControl;
     EventID := 0;
     EventType := etIndexChanging;
-    IndexChangingEvent := Event;
+    IndexChangingEvent := AEvent;
   end;
+
+  AControl.FreeNotification(Self);
 end;
 
 procedure TGsChangeNotifier.UnchainEvents;
@@ -842,3 +870,4 @@ begin
 end;
 
 end.
+
