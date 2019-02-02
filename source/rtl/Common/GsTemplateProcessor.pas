@@ -3,25 +3,35 @@ unit GsTemplateProcessor;
 interface
 
 uses
+  Classes,
   TypInfo;
 
 type
   TGsTemplateProcessor = class
   private
   protected
-    class function GetMarker(const AName: TSymbolName): string; dynamic;
-    class function GetPMarkerStart(const AName: TSymbolName): string; dynamic;
+    class function GetMarker(const Name, Prefix: TSymbolName): string; dynamic;
+    class function GetPMarkerStart(const Name, Prefix: TSymbolName): string; dynamic;
     class function GetPMarkerEnd: string; dynamic;
 
     class function GetPropValue(Instance: TObject; PropInfo: PPropInfo;
       const Format: string = ''): string; dynamic;
 
-    class function ProcessMarker(const Template: string; Instance: TObject;
-      PropInfo: PPropInfo): string; dynamic;
-    class function ProcessPMarker(const Template: string; Instance: TObject;
-      PropInfo: PPropInfo): string; dynamic;
+    class function ProcessMarker(const Template: string; const Prefix: TSymbolName;
+      Instance: TObject; PropInfo: PPropInfo): string; dynamic;
+    class function ProcessPMarker(const Template: string;
+      const Prefix: TSymbolName; Instance: TObject; PropInfo: PPropInfo): string;
+      dynamic;
+
+    class function CalcPrefix(const Prefix, PropName: TSymbolName): TSymbolName;
+
+    class function InternalProcess(const Template: string;
+      const Prefix: TSymbolName; Properties: TObject): string; dynamic;
+    class function InternalExtractMarkers(const Prefix: TSymbolName;
+      Properties: TObject): TStrings; dynamic;
   public
     class function Process(const Template: string; Properties: TObject): string;
+    class function ExtractMarkers(Properties: TObject): TStrings;
   end;
 
 (*
@@ -148,7 +158,6 @@ See FormatFloat
 implementation
 
 uses
-  AnsiStrings,
   RTLConsts,
   SysUtils,
   Variants;
@@ -158,9 +167,25 @@ resourcestring
 
 { TGsTemplateProcessor }
 
-class function TGsTemplateProcessor.GetMarker(const AName: TSymbolName): string;
+class function TGsTemplateProcessor.CalcPrefix(
+  const Prefix, PropName: TSymbolName): TSymbolName;
 begin
-  Result := '%' + String(AnsiStrings.UpperCase(AName)) + '%';
+  if (Prefix <> '') then
+    Result := Prefix + '.'
+  else
+    Result := '';
+
+  Result := Result + PropName;
+end;
+
+class function TGsTemplateProcessor.ExtractMarkers(Properties: TObject): TStrings;
+begin
+  Result := InternalExtractMarkers('', Properties);
+end;
+
+class function TGsTemplateProcessor.GetMarker(const Name, Prefix: TSymbolName): string;
+begin
+  Result := '%' + String(CalcPrefix(Prefix, Name)) + '%';
 end;
 
 class function TGsTemplateProcessor.GetPMarkerEnd: string;
@@ -168,9 +193,10 @@ begin
   Result := ')%';
 end;
 
-class function TGsTemplateProcessor.GetPMarkerStart(const AName: TSymbolName): string;
+class function TGsTemplateProcessor.GetPMarkerStart(
+  const Name, Prefix: TSymbolName): string;
 begin
-  Result := '%' + String(AnsiStrings.UpperCase(AName)) + '(';
+  Result := '%' + String(CalcPrefix(Prefix, Name)) + '(';
 end;
 
 class function TGsTemplateProcessor.GetPropValue(Instance: TObject;
@@ -256,7 +282,7 @@ begin
         end;
       end;
     tkString, tkLString, tkWString, tkUString: Result := GetStrProp(Instance, PropInfo);
-    tkWChar: Result := WideChar(GetOrdProp(Instance, PropInfo));
+    tkWChar: Result := Widechar(GetOrdProp(Instance, PropInfo));
     tkVariant: Result := VarToStr(GetVariantProp(Instance, PropInfo));
     tkInt64:
       if Format <> '' then
@@ -268,17 +294,71 @@ begin
           else
             Result := IntToStr(GetInt64Prop(Instance, PropInfo));
   else
+    Result := '';
+    { TODO : Add CodeSite message }
+    (*
     raise EPropertyConvertError.CreateResFmt(@SInvalidPropertyType,
       [GetTypeName(PropInfo.PropType^)]);
+    *)
   end;
 end;
 
-class function TGsTemplateProcessor.Process(const Template: string;
-  Properties: TObject): string;
+class function TGsTemplateProcessor.InternalExtractMarkers(const Prefix: TSymbolName;
+  Properties: TObject): TStrings;
+resourcestring
+  SFormat = 'Format';
 var
   PropCount: Integer;
   PropList: PPropList;
   I: Integer;
+  Obj: TObject;
+  Strs: TStrings;
+begin
+  Result := TStringList.Create;
+
+  { Process properties }
+  PropCount := GetPropList(Properties, PropList);
+
+  for I := 0 to PropCount - 1 do
+  begin
+    if (PropList^[I]^.PropType^^.Kind = tkClass) then
+    begin
+      NativeInt(Obj) := GetOrdProp(Properties, PropList^[I]);
+
+      if (Obj <> nil) then
+      begin
+        Strs := InternalExtractMarkers(CalcPrefix(Prefix, PropList^[I].Name), Obj);
+
+        try
+          Result.AddStrings(Strs);
+        finally
+          Strs.Free;
+        end;
+      end;
+    end
+    else
+    begin
+      case PropList^[I]^.PropType^^.Kind of
+        tkInteger, tkFloat, tkInt64:
+        begin
+          Result.Add(GetMarker(PropList^[I].Name, Prefix) + ' | ' +
+            StringReplace(GetPMarkerStart(PropList^[I].Name, Prefix) +
+            GetPMarkerEnd, '()', '(' + SFormat + ')', []));
+        end;
+      else
+        Result.Add(GetMarker(PropList^[I].Name, Prefix));
+      end;
+    end;
+  end;
+end;
+
+class function TGsTemplateProcessor.InternalProcess(const Template: string;
+  const Prefix: TSymbolName; Properties: TObject): string;
+var
+  PropCount: Integer;
+  PropList: PPropList;
+  I: Integer;
+  Obj: TObject;
 begin
   Result := Template;
 
@@ -287,26 +367,42 @@ begin
 
   for I := 0 to PropCount - 1 do
   begin
-    { Process markers }
-    Result := ProcessMarker(Result, Properties, PropList^[I]);
+    if (PropList^[I]^.PropType^^.Kind = tkClass) then
+    begin
+      NativeInt(Obj) := GetOrdProp(Properties, PropList^[I]);
 
-    { Process parametered marker }
-    Result := ProcessPMarker(Result, Properties, PropList^[I]);
+      if (Obj <> nil) then
+        Result := InternalProcess(Result, CalcPrefix(Prefix, PropList^[I].Name), Obj);
+    end
+    else
+    begin
+      { Process markers }
+      Result := ProcessMarker(Result, Prefix, Properties, PropList^[I]);
+
+      { Process parametered marker }
+      Result := ProcessPMarker(Result, Prefix, Properties, PropList^[I]);
+    end;
   end;
 end;
 
-class function TGsTemplateProcessor.ProcessMarker(const Template: string;
-  Instance: TObject; PropInfo: PPropInfo): string;
+class function TGsTemplateProcessor.Process(const Template: string;
+  Properties: TObject): string;
 begin
-  Result := StringReplace(Template, GetMarker(PropInfo^.Name),
+  Result := InternalProcess(Template, '', Properties);
+end;
+
+class function TGsTemplateProcessor.ProcessMarker(const Template: string;
+  const Prefix: TSymbolName; Instance: TObject; PropInfo: PPropInfo): string;
+begin
+  Result := StringReplace(Template, GetMarker(PropInfo^.Name, Prefix),
     GetPropValue(Instance, PropInfo), [rfReplaceAll, rfIgnoreCase]);
 end;
 
 class function TGsTemplateProcessor.ProcessPMarker(const Template: string;
-  Instance: TObject; PropInfo: PPropInfo): string;
+  const Prefix: TSymbolName; Instance: TObject; PropInfo: PPropInfo): string;
 var
   UTemplate: string;
-  MS: string;
+  MS, ME: string;
   MSLen: Integer;
   S, E: Integer;
   Format: string;
@@ -319,14 +415,15 @@ begin
   UTemplate := UpperCase(Template);
 
   { Search start marker }
-  MS := GetPMarkerStart(PropInfo^.Name);
+  MS := UpperCase(GetPMarkerStart(PropInfo^.Name, Prefix));
   S  := Pos(MS, UTemplate);
 
   if (S > 0) then
   begin
     { Search end marker }
     MSLen := Length(MS);
-    E := Pos(GetPMarkerEnd, UTemplate, S + MSLen);
+    ME := UpperCase(GetPMarkerEnd);
+    E  := Pos(ME, UTemplate, S + MSLen);
 
     if E = 0 then
       raise Exception.CreateRes(@SErrorEndMarkerNotFound);
@@ -334,14 +431,14 @@ begin
     { Extract format }
     Format := Copy(Template, S + Length(MS), E - S - MSLen);
     FormattedValue := GetPropValue(Instance, PropInfo, Format);
-    Marker := MS + Format + GetPMarkerEnd;
+    Marker := MS + Format + ME;
 
     { Replace all }
     Result := StringReplace(Template, Marker, FormattedValue,
       [rfReplaceAll, rfIgnoreCase]);
 
     { Recursive call to handle other formats }
-    Result := ProcessPMarker(Result, Instance, PropInfo);
+    Result := ProcessPMarker(Result, Prefix, Instance, PropInfo);
   end;
 end;
 
