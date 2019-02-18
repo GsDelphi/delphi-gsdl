@@ -18,7 +18,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 }
 {
-  @abstract(Gilbertsoft AnsiString routines)
+  @abstract(Gilbertsoft Syslog routines)
   @seealso(SecLicense License)
   @author(Simon Gilli <delphi@gilbertsoft.org>)
   @created(2019-01-09)
@@ -27,6 +27,8 @@
   @name contains system constants and resourcestrings.
 }
 unit GsSyslog;
+
+{$I gsdl.inc}
 
 interface
 
