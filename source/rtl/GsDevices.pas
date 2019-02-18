@@ -163,6 +163,10 @@ destructor TGSDeviceChangeHandler.Destroy;
 begin
   Active := False;
   Classes.DeallocateHWnd(FWindowReceiver);
+
+  while (FNotifyList.Count > 0) do
+    DeleteItem(FNotifyList.Count - 1);
+
   FNotifyList.Free;
 
   inherited;
