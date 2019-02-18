@@ -26,6 +26,8 @@ interface
 uses
   Classes,
   Controls,
+  Generics.Collections,
+  GsClasses,
   GsSystem,
   RzRadGrp;
 
@@ -39,13 +41,17 @@ uses
 
 type
   TCustomAssignEnumProc = procedure(AControl: TControl;
-    DescriptorInfo: TEnumDescriptorInfo; Value: Integer);
+    ADescriptorInfo: TEnumDescriptorInfo; ADefaultValue: Integer);
   PCustomAssignEnumProc = ^TCustomAssignEnumProc;
 
-procedure AssignEnum(AControl: TControl; DescriptorInfo: TEnumDescriptorInfo;
-  Value: Integer = -1);
-function GetSelectedEnum(AControl: TControl; DescriptorInfo: TEnumDescriptorInfo;
-  DefaultValue: Integer = -1): Cardinal;
+  TAddItemProc = procedure(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
+    AValue: Integer; var Handled: Boolean);
+  PAddItemProc = ^TAddItemProc;
+
+procedure AssignEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
+  AValue: Integer = -1; AAddItemProc: PAddItemProc = nil);
+function GetSelectedEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
+  ADefaultValue: Integer = -1): Integer;
 
 procedure RegisterCustomAssignEnumProc(AControlClass: TControlClass;
   CustomProc: PCustomAssignEnumProc);
@@ -53,6 +59,10 @@ procedure RegisterCustomAssignEnumProc(AControlClass: TControlClass;
 //    GetEnumName(TypeInfo: PTypeInfo; Value: Integer): string;
 
 type
+  TGsChangeNotifier = class;
+
+
+
   TEventType      = (etNotify, etIndexChanging);
   TEventID        = type Byte;
   PNotifyEventRec = ^TNotifyEventRec;
@@ -65,11 +75,24 @@ type
       etIndexChanging: (IndexChangingEvent: TRzIndexChangingEvent);
   end;
 
+  TChangeOperation = (coChanged, coSaved);
+
+  TChangeNotifyEvent = procedure(AChangeNotifier: TGsChangeNotifier; Operation: TChangeOperation) of object;
+
+  IChangeNotify = interface
+    ['{A670276D-1212-4516-951E-83EB16CA182D}']
+    procedure Modified;
+    procedure Notification(AChangeNotifier: TGsChangeNotifier; Operation: TChangeOperation);
+    procedure ChangeNotification(AChangeNotifier: TGsChangeNotifier);
+    procedure RemoveChangeNotification(AChangeNotifier: TGsChangeNotifier);
+  end;
+
   TGsChangeNotifier = class(TComponent)
   private
     FList:           TList;
-    FOnChange:       TNotifyEvent;
+    FOnChange:       TGsNotifyEvent;
     FEventsDisabled: Boolean;
+    //FChangeNotifies: TList<TGsChangeNotifier>;
     procedure NotifyEvent(EventID: TEventID; Sender: TObject);
     procedure NotifyEvent0(Sender: TObject);
     procedure NotifyEvent1(Sender: TObject);
@@ -83,12 +106,14 @@ type
     procedure NotifyEvent9(Sender: TObject);
     procedure IndexChangingEvent(Sender: TObject; NewIndex: Integer;
       var AllowChange: Boolean);
+    //procedure RemoveNotification(AChangeNotifier: TGsChangeNotifier);
   protected
     { TComponent }
     procedure Loaded; override;
-    procedure Notification(AComponent: TComponent;  Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); overload; override;
 
     { Methods }
+    //procedure Notification(AChangeNotifier: TGsChangeNotifier; Operation: TChangeOperation); overload; virtual;
     procedure ChainEvents; dynamic;
     procedure UnchainEvents; dynamic;
 
@@ -102,12 +127,16 @@ type
       overload;
   public
     constructor Create(AOwner: TComponent); overload; override;
+    constructor CreateAndChain(AOwner: TComponent; Dummy: Integer = 0); overload; virtual;
     destructor Destroy; override;
 
     procedure DisableEvents;
     procedure EnableEvents;
+    //procedure ChangeNotification(AChangeNotifier: TGsChangeNotifier);
+    //procedure RemoveChangeNotification(AChangeNotifier: TGsChangeNotifier);
   published
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChange: TGsNotifyEvent read FOnChange write FOnChange;
+    //property OnNotify: TChangeNotifyEvent read FOnNotify write FOnNotify;
   end;
 
 implementation
@@ -216,8 +245,8 @@ begin
   Result := lItemsAssignedValue;
 end;
 
-procedure AssignEnum(AControl: TControl; DescriptorInfo: TEnumDescriptorInfo;
-  Value: Integer);
+procedure AssignEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
+  AValue: Integer; AAddItemProc: PAddItemProc);
 var
   ItemsCount: Integer;
   ItemsAssigned: Boolean;
@@ -228,9 +257,9 @@ var
   begin
     if (ItemsCount = 0) then
     begin
-      for I := 0 to DescriptorInfo.Length - 1 do
+      for I := 0 to ADescriptorInfo.Length - 1 do
       begin
-        if (DescriptorInfo.Descriptors^[Cardinal(I)].ItemIndex > -1) then
+        if (ADescriptorInfo.Descriptors^[Cardinal(I)].ItemIndex > -1) then
           Inc(ItemsCount);
       end;
     end;
@@ -244,8 +273,8 @@ var
     begin
       Result := -1;
 
-      if (Value >= 0) and (Cardinal(Value) < DescriptorInfo.Length) then
-        Result := DescriptorInfo.Descriptors^[Value].ItemIndex;
+      if (AValue >= 0) and (Cardinal(AValue) < ADescriptorInfo.Length) then
+        Result := ADescriptorInfo.Descriptors^[AValue].ItemIndex;
     end;
 
   resourcestring
@@ -253,6 +282,7 @@ var
   var
     C, I{, L}: Integer;
     J: Cardinal;
+    Handled: Boolean;
   begin
     Result := -1;
 
@@ -272,19 +302,28 @@ var
     begin
       J := 0;
 
-      while (Cardinal(J) < DescriptorInfo.Length) and
-        (DescriptorInfo.Descriptors^[J].ItemIndex <> I) do
+      while (Cardinal(J) < ADescriptorInfo.Length) and
+        (ADescriptorInfo.Descriptors^[J].ItemIndex <> I) do
         Inc(J);
 
-      if (J = DescriptorInfo.Length) then
+      if (J = ADescriptorInfo.Length) then
         raise Exception.CreateResFmt(@SErrorIndexNotFound, [I]);
 
       { TODO : allow adding the index or value e.g. "Caption (value)" }
-      Items.AddObject(LoadResString(DescriptorInfo.Descriptors^[J].Caption),
-        TObject(J));
+      Handled := False;
+      (*
+      if (AAddItemProc <> nil) then
+        @AAddItemProc(Items, J, Handled);
+      *)
 
-      if (Value > -1) and (J = Cardinal(Value)) then
-        Result := I;
+      if not Handled then
+      begin
+        Items.AddObject(LoadResString(ADescriptorInfo.Descriptors^[J].Caption),
+          TObject(J));
+
+        if (AValue > -1) and (J = Cardinal(AValue)) then
+          Result := I;
+      end;
     end;
   end;
 
@@ -305,7 +344,7 @@ begin
       (CustomAssignEnumProcs.Find(TControlClass(AControl.ClassType)) > -1) then
     begin
       CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
-        AControl, DescriptorInfo, Value);
+        AControl, ADescriptorInfo, AValue);
     end
     else if AControl is TRzRadioGroup then
     begin
@@ -334,22 +373,22 @@ begin
   end;
 end;
 
-function GetSelectedEnum(AControl: TControl; DescriptorInfo: TEnumDescriptorInfo;
-  DefaultValue: Integer): Cardinal;
+function GetSelectedEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
+  ADefaultValue: Integer): Integer;
 
   function GetDefaultValue: Cardinal;
   var
     I: Integer;
   begin
-    if DefaultValue > -1 then
-      Result := DefaultValue
+    if ADefaultValue > -1 then
+      Result := ADefaultValue
     else
     begin
       Result := 0;
 
-      for I := 0 to DescriptorInfo.Length - 1 do
+      for I := 0 to ADescriptorInfo.Length - 1 do
       begin
-        if (DescriptorInfo.Descriptors^[I].ItemIndex = -1) then
+        if (ADescriptorInfo.Descriptors^[I].ItemIndex = -1) then
         begin
           Result := I;
           Exit;
@@ -363,15 +402,17 @@ var
   CustomCombo:  TCustomCombo;
   CustomListBox: TCustomListBox;
 begin
+  Result := -1;
+
   if (AControl.Tag <> GetItemsAssignedValue) then
     RaiseItemsNotAssigned(AControl);
 
   if Assigned(CustomAssignEnumProcs) and
     (CustomAssignEnumProcs.Find(TControlClass(AControl.ClassType)) > -1) then
   begin
-    {TODO 1 : implement }
-(*    CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
-      AControl, Descriptors, Value);*)
+    { DONE 1 : implement }
+    CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
+      AControl, ADescriptorInfo, ADefaultValue);
   end
   else if AControl is TRzRadioGroup then
   begin
@@ -520,9 +561,6 @@ var
   I: Integer;
   Control: TControl;
 begin
-  { TODO 1 : remove }
-  // Exit;
-
   with Owner do
   begin
     for I := 0 to ComponentCount - 1 do
@@ -542,7 +580,8 @@ begin
         // |- TCustomLabel
 
         if not (Components[I] is TRzCustomRadioGroup) and not
-          (Components[I] is TRzCustomCheckGroup) and not (Components[I] is TRzCustomCheckBox) and
+          (Components[I] is TRzCustomCheckGroup) and not
+          (Components[I] is TRzCustomCheckBox) and
           ((Components[I] is TCustomMultiSelectListControl) or
           (Components[I] is TCustomPanel) or (Components[I] is TCustomLabel) or
           (Components[I] is TRzSpacer) or (Components[I] is TRzToolButton) or
@@ -618,7 +657,12 @@ begin
   inherited;
 
   FList := TList.Create;
-  { TODO : delete after using }
+end;
+
+constructor TGsChangeNotifier.CreateAndChain(AOwner: TComponent; Dummy: Integer);
+begin
+  Create(AOwner);
+
   ChainEvents;
 end;
 
@@ -683,15 +727,11 @@ begin
 
   inherited;
 
-  if not (csDesigning in ComponentState) then
-  begin
-    if Loading then
-      ChainEvents;
-  end;
+  if not (csDesigning in ComponentState) and Loading then
+    ChainEvents;
 end;
 
-procedure TGsChangeNotifier.Notification(AComponent: TComponent;
-  Operation: TOperation);
+procedure TGsChangeNotifier.Notification(AComponent: TComponent; Operation: TOperation);
 var
   I: Integer;
 begin
@@ -797,6 +837,8 @@ begin
     EventType := etNotify;
     NotifyEvent := AEvent;
   end;
+
+  AControl.FreeNotification(Self);
 end;
 
 procedure TGsChangeNotifier.RegisterEvent(AControl: TControl;
@@ -817,9 +859,6 @@ procedure TGsChangeNotifier.UnchainEvents;
 var
   I, J: Integer;
 begin
-  { TODO 1 : remove }
-  // Exit;
-
   with Owner do
   begin
     for I := 0 to ComponentCount - 1 do
