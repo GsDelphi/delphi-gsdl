@@ -85,7 +85,7 @@ type
     property CompressionLevel: TCompressionLevel read FCompressionLevel write SetCompressionLevel;
     property UseCompression: Boolean read FUseCompression write SetUseCompression;
     property UseEncryption: Boolean read FUseEncryption write SetUseEncryption;
-  end;
+  end deprecated 'Use TGsStream instead';
 
   TGSQueueStream = class(TMemoryStream)
   private
@@ -115,6 +115,9 @@ type
   end;
   }
 
+const
+  GS_SECURE_STREAM_HEADER = 'GSSecureStream'#0;
+
 implementation
 
 uses
@@ -126,9 +129,6 @@ uses
 resourcestring
   SNoCipherKeyDefined = 'Schlüssel für die Verschlüsselung ist nicht definiert!';
   SInvalidStreamHeader = 'Fehlerhafter Stream!';
-
-const
-  GS_SECURE_STREAM_HEADER = 'GSSecureStream'#0;
 
 procedure TGSSecureStream.Clear;
 begin
