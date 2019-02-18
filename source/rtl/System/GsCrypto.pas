@@ -48,6 +48,11 @@ const
   DEFAULT_CIPHER_MODE = cmCBCx;
   DEFAULT_KDF_INDEX   = 1;
 
+var
+  DEFAULT_FORMAT_CLASS: TDECFormatClass = TFormat_Copy;
+  DEFAULT_CIPHER_CLASS: TDECCipherClass = TCipher_Rijndael;
+  DEFAULT_HASH_CLASS: TDECHashClass = THash_Whirlpool;
+
 { Crypto functions }
 
 procedure Encrypt(const Source: TBytes; var Dest: TBytes; const APassword: TBytes;
@@ -234,11 +239,6 @@ resourcestring
 const
   DEFAULT_SALT_LEN = 16;
 
-var
-  DEFAULT_TEXT_FORMAT: TDECFormatClass = TFormat_Copy;
-  DEFAULT_CIPHER_CLASS: TDECCipherClass = TCipher_Rijndael;
-  DEFAULT_HASH_CLASS: TDECHashClass = THash_Whirlpool;
-
 procedure Encrypt(const Source: TBytes; var Dest: TBytes; const APassword: TBytes;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
   ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
@@ -254,7 +254,7 @@ begin
 
   { Set default parameters }
   if ATextFormat = nil then
-    ATextFormat := DEFAULT_TEXT_FORMAT;
+    ATextFormat := DEFAULT_FORMAT_CLASS;
 
   if ACipherClass = nil then
     ACipherClass := DEFAULT_CIPHER_CLASS;
@@ -390,7 +390,7 @@ begin
 
   { Set default parameters }
   if ATextFormat = nil then
-    ATextFormat := DEFAULT_TEXT_FORMAT;
+    ATextFormat := DEFAULT_FORMAT_CLASS;
 
   if ACipherClass = nil then
     ACipherClass := DEFAULT_CIPHER_CLASS;
