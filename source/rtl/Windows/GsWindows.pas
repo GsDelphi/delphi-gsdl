@@ -24,9 +24,64 @@ interface
 uses
   Windows;
 
+function GetComputerName: string; overload;
+function GetComputerNameEx(AFormat: TComputerNameFormat): string; overload
+function GetUserName: string;
+
 function IsDebuggerPresent: BOOL; stdcall;
 
 implementation
+
+uses
+  SysUtils;
+
+var
+  LComputerName: array [TComputerNameFormat] of string;
+  LUserName: string;
+
+function GetComputerName: string;
+begin
+  Result := GetComputerNameEx(ComputerNameNetBIOS);
+end;
+
+function GetComputerNameEx(AFormat: TComputerNameFormat): string;
+var
+  Size: DWORD;
+begin
+  if (LComputerName[AFormat] = '') then
+  begin
+    Windows.GetComputerNameEx(AFormat, nil, Size);
+
+    SetLength(LComputerName[AFormat], Size);
+
+    if not Windows.GetComputerNameEx(AFormat,
+      @LComputerName[AFormat][1], Size) then
+      LComputerName[AFormat] := ''
+    else
+      LComputerName[AFormat] := Trim(LComputerName[AFormat]);
+  end;
+
+  Result := LComputerName[AFormat];
+end;
+
+function GetUserName: string;
+var
+  Size: DWORD;
+begin
+  if (LUserName = '') then
+  begin
+    Windows.GetUserName(nil, Size);
+
+    SetLength(LUserName, Size);
+
+    if not Windows.GetUserName(@LUserName[1], Size) then
+      LUserName := ''
+    else
+      LUserName := Trim(LUserName);
+  end;
+
+  Result := LUserName;
+end;
 
 function IsDebuggerPresent; external kernel32 name 'IsDebuggerPresent';
 
