@@ -48,21 +48,17 @@ type
     { TPersistent }
     //procedure Assign(Source: TPersistent); override;
 
-    { TGsSSmtp }
-    property Host: String read GetHost write SetHost;
-    property Port: Word read GetPort write SetPort;
-    property Username: String read GetUsername write SetUsername;
-    property Password: String read GetPassword write SetPassword;
-  published
+    { Settings properties }
     property _Host: TBPSPString read FHost;
     property _Port: TBPSPInteger read FPort;
     property _Username: TBPSPString read FUsername;
     property _Password: TBPSPPassword read FPassword;
-    (*
-    property _LogEmailFrom: TBPSPString read FLogEmailFrom;
-    property _LogEmailTo: TBPSPString read FLogEmailTo;
-    property _LogLevel: TBPSPInteger read FLogLevel;
-    *)
+
+    { Easy property access }
+    property Host: String read GetHost write SetHost;
+    property Port: Word read GetPort write SetPort;
+    property Username: String read GetUsername write SetUsername;
+    property Password: String read GetPassword write SetPassword;
   end;
 
   TBPSPIdUseTLS = class(TCustomBPSettingsEnumProperty,
