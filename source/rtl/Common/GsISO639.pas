@@ -1,6 +1,6 @@
 ﻿unit GsISO639;
 
-{$DEFINE mORMot}
+{.$DEFINE mORMot}
 
 interface
 
@@ -27,7 +27,7 @@ type
   {$ENDIF ~!mORMot}
 
   /// Language identifiers, following ISO 639-1 Alpha-2 code
-  TLanguageIdentifier = (lcUndefined,
+  TGsLanguageIdentifier = (lcUndefined,
     lcAB, lcAA, lcAF, lcAK, lcSQ, lcAM, lcAR, lcAN, lcHY, lcAS, lcAV,
     lcAE, lcAY, lcAZ, lcBM, lcBA, lcEU, lcBE, lcBN, lcBH, lcBI, lcBS,
     lcBR, lcBG, lcMY, lcCA, lcKM, lcCH, lcCE, lcNY, lcZH, lcCU, lcCV,
@@ -46,12 +46,12 @@ type
     lcTR, lcTK, lcTW, lcUG, lcUK, lcUR, lcUZ, lcVE, lcVI, lcVO, lcWA,
     lcCY, lcFY, lcWO, lcXH, lcYI, lcYO, lcZA, lcZU);
 
-  TLanguageIdentifiers = set of TLanguageIdentifier;
+  TGsLanguageIdentifiers = set of TGsLanguageIdentifier;
 
-  TLanguageIsoAlpha2  = type RawUTF8;
-  TLanguageIsoAlpha3  = type RawUTF8;
-  TLanguageIsoAlpha3T = type TLanguageIsoAlpha3;
-  TLanguageIsoAlpha3B = type TLanguageIsoAlpha3;
+  TGsLanguageIsoAlpha2  = type RawUTF8;
+  TGsLanguageIsoAlpha3  = type RawUTF8;
+  TGsLanguageIsoAlpha3T = type TGsLanguageIsoAlpha3;
+  TGsLanguageIsoAlpha3B = type TGsLanguageIsoAlpha3;
   {$IFDEF MSWINDOWS}
   //TLanguageId        = type LANGID;
   {$ELSE ~MSWINDOWS}
@@ -62,24 +62,24 @@ type
   // - includes conversion methods for ISO 639 alpha-2 / alpha-3 codes
   // as explained in https://en.wikipedia.org/wiki/ISO_639
   // - includes conversion methods for Windows API LANGID
-  TLanguage = class({$IFDEF mORMot}TSynPersistent{$ELSE}TPersistent{$ENDIF})
+  TGsLanguage = class({$IFDEF mORMot}TSynPersistent{$ELSE}TPersistent{$ENDIF})
   private
     function GetNative: RawUTF8;
     procedure SetLangID(const Value: LANGID);
   protected
-    FIso:   TLanguageIsoAlpha3T;
+    FIso:   TGsLanguageIsoAlpha2;
     FCache: packed record
-      Identifier: TLanguageIdentifier;
-      Iso:        TLanguageIsoAlpha3T;
+      Identifier: TGsLanguageIdentifier;
+      Iso:        TGsLanguageIsoAlpha2;
     end;
-    function GetIdentifier: TLanguageIdentifier;
-    function GetIsoAlpha2: TLanguageIsoAlpha2;
-    function GetIsoAlpha3T: TLanguageIsoAlpha3T;
-    function GetIsoAlpha3B: TLanguageIsoAlpha3B;
-    procedure SetIdentifier(const Value: TLanguageIdentifier);
-    procedure SetIsoAlpha2(const Value: TLanguageIsoAlpha2);
-    procedure SetIsoAlpha3T(const Value: TLanguageIsoAlpha3T);
-    procedure SetIsoAlpha3B(const Value: TLanguageIsoAlpha3B);
+    function GetIdentifier: TGsLanguageIdentifier;
+    function GetIsoAlpha2: TGsLanguageIsoAlpha2;
+    function GetIsoAlpha3T: TGsLanguageIsoAlpha3T;
+    function GetIsoAlpha3B: TGsLanguageIsoAlpha3B;
+    procedure SetIdentifier(const Value: TGsLanguageIdentifier);
+    procedure SetIsoAlpha2(const Value: TGsLanguageIsoAlpha2);
+    procedure SetIsoAlpha3T(const Value: TGsLanguageIsoAlpha3T);
+    procedure SetIsoAlpha3B(const Value: TGsLanguageIsoAlpha3B);
     function GetEnglish: RawUTF8;
     function GetLangID: LANGID;
   public
@@ -87,15 +87,15 @@ type
     //class procedure RegressionTests(test: TSynTestCase);
     /// returns TRUE if both Language instances have the same content
     // - slightly faster than global function ObjectEquals(self,another)
-    function Equals(ALanguage: TLanguage): Boolean; reintroduce;
+    function Equals(ALanguage: TGsLanguage): Boolean; reintroduce;
     /// internal enumerate corresponding to this language
-    property Identifier: TLanguageIdentifier read GetIdentifier write SetIdentifier;
+    property Identifier: TGsLanguageIdentifier read GetIdentifier write SetIdentifier;
     /// the ISO 639-1 alpha-2 code of this language, e.g. 'fr' or 'en'
-    property Alpha2: TLanguageIsoAlpha2 read GetIsoAlpha2 write SetIsoAlpha2;
+    property Alpha2: TGsLanguageIsoAlpha2 read GetIsoAlpha2 write SetIsoAlpha2;
     /// the ISO 639-2/T alpha-3 code of this language, e.g. 'fra' or 'eng'
-    property Alpha3T: TLanguageIsoAlpha3T read GetIsoAlpha3T write SetIsoAlpha3T;
+    property Alpha3T: TGsLanguageIsoAlpha3T read GetIsoAlpha3T write SetIsoAlpha3T;
     /// the ISO 639-2/B alpha-3 code of this language, e.g. 'fre' or 'eng'
-    property Alpha3B: TLanguageIsoAlpha3B read GetIsoAlpha3B write SetIsoAlpha3B;
+    property Alpha3B: TGsLanguageIsoAlpha3B read GetIsoAlpha3B write SetIsoAlpha3B;
     /// plain English text of this language, e.g. 'French' or 'English'
     property English: RawUTF8 read GetEnglish;
     /// plain native text of this language, e.g. 'Français' or 'English'
@@ -106,13 +106,23 @@ type
     {$ENDIF ~MSWINDOWS}
   published
     /// the stored and transmitted value is this ISO 639-1 alpha-2 code
-    property Iso: TLanguageIsoAlpha2 read FIso write FIso;
+    property Iso: TGsLanguageIsoAlpha2 read FIso write FIso;
   end;
 
 const
-  lcFirst = Succ(Low(TLanguageIdentifier));
-  lcLast  = High(TLanguageIdentifier);
+  lcFirst = Succ(Low(TGsLanguageIdentifier));
+  lcLast  = High(TGsLanguageIdentifier);
   lcAll   = [lcFirst..lcLast];
+
+
+function GetLanguageIdentifierIsoAlpha2(ALanguage: TGsLanguageIdentifier): TGsLanguageIsoAlpha2;
+function GetLanguageIdentifierIsoAlpha3T(ALanguage: TGsLanguageIdentifier): TGsLanguageIsoAlpha3T;
+function GetLanguageIdentifierIsoAlpha3B(ALanguage: TGsLanguageIdentifier): TGsLanguageIsoAlpha3B;
+
+function GetLanguageIdentifierCaptionEnglish(ALanguage: TGsLanguageIdentifier): string;
+function GetLanguageIdentifierCaptionNative(ALanguage: TGsLanguageIdentifier): string;
+function GetLanguageIdentifierResEnglish(ALanguage: TGsLanguageIdentifier): PResStringRec;
+function GetLanguageIdentifierResNative(ALanguage: TGsLanguageIdentifier): PResStringRec;
 
 implementation
 
@@ -493,7 +503,7 @@ resourcestring
   SNativeZU  = 'isiZulu';
 
 const
-  LANGUAGE_NAME_EN: array[TLanguageIdentifier] of PResStringRec =
+  LANGUAGE_NAME_EN: array[TGsLanguageIdentifier] of PResStringRec =
     (@SUndefined, @SEnglishAB, @SEnglishAA, @SEnglishAF, @SEnglishAK,
     @SEnglishSQ, @SEnglishAM, @SEnglishAR, @SEnglishAN, @SEnglishHY,
     @SEnglishAS, @SEnglishAV, @SEnglishAE, @SEnglishAY, @SEnglishAZ,
@@ -532,7 +542,7 @@ const
     @SEnglishVO, @SEnglishWA, @SEnglishCY, @SEnglishFY, @SEnglishWO,
     @SEnglishXH, @SEnglishYI, @SEnglishYO, @SEnglishZA, @SEnglishZU);
 
-  LANGUAGE_NAME_NATIVE: array[TLanguageIdentifier] of PResStringRec =
+  LANGUAGE_NAME_NATIVE: array[TGsLanguageIdentifier] of PResStringRec =
     (@SUndefined, @SNativeAB, @SNativeAA, @SNativeAF, @SNativeAK,
     @SNativeSQ, @SNativeAM, @SNativeAR, @SNativeAN, @SNativeHY, @SNativeAS,
     @SNativeAV, @SNativeAE, @SNativeAY, @SNativeAZ, @SNativeBM, @SNativeBA,
@@ -565,7 +575,7 @@ const
     @SNativeVE, @SNativeVI, @SNativeVO, @SNativeWA, @SNativeCY, @SNativeFY,
     @SNativeWO, @SNativeXH, @SNativeYI, @SNativeYO, @SNativeZA, @SNativeZU);
 
-  LANGUAGE_ISO3T: array[TLanguageIdentifier] of array[0..3] of AnsiChar = ('',
+  LANGUAGE_ISO3T: array[TGsLanguageIdentifier] of array[0..3] of AnsiChar = ('',
     'abk', 'aar', 'afr', 'aka', 'sqi', 'amh', 'ara', 'arg', 'hye', 'asm',
     'ava', 'ave', 'aym', 'aze', 'bam', 'bak', 'eus', 'bel', 'ben', 'bih',
     'bis', 'bos', 'bre', 'bul', 'mya', 'cat', 'khm', 'cha', 'che', 'nya',
@@ -586,7 +596,7 @@ const
     'urd', 'uzb', 'ven', 'vie', 'vol', 'wln', 'cym', 'fry', 'wol', 'xho',
     'yid', 'yor', 'zha', 'zul');
 
-  LANGUAGE_ISO3B: array[TLanguageIdentifier] of array[0..3] of AnsiChar = ('',
+  LANGUAGE_ISO3B: array[TGsLanguageIdentifier] of array[0..3] of AnsiChar = ('',
     'abk', 'aar', 'afr', 'aka', 'alb', 'amh', 'ara', 'arg', 'arm', 'asm',
     'ava', 'ave', 'aym', 'aze', 'bam', 'bak', 'baq', 'bel', 'ben', 'bih',
     'bis', 'bos', 'bre', 'bul', 'bur', 'cat', 'khm', 'cha', 'che', 'nya',
@@ -611,7 +621,7 @@ type
   TLocaleListOption = (lloAll, lloPrimary, lloSub);
 
 var
-  LANGUAGE_ISO2: array[TLanguageIdentifier] of Word;
+  LANGUAGE_ISO2: array[TGsLanguageIdentifier] of Word;
 
   Locales: TStringList = nil;
   PrimaryLocales: TStringList = nil;
@@ -619,12 +629,12 @@ var
 
 procedure Initialize;
 var
-  L: TLanguageIdentifier;
+  L: TGsLanguageIdentifier;
   S: PAnsiChar; // circumvent FPC compilation issue
 begin
   for L := lcFirst to lcLast do
   begin
-    S := Pointer(GetEnumName(TypeInfo(TLanguageIdentifier), Ord(L)));
+    S := Pointer(GetEnumName(TypeInfo(TGsLanguageIdentifier), Ord(L)));
     LANGUAGE_ISO2[L] := PWord(S + 3)^;
   end;
 end;
@@ -827,9 +837,44 @@ begin
   end;
 end;
 
-{ TLanguage }
+function GetLanguageIdentifierIsoAlpha2(ALanguage: TGsLanguageIdentifier): TGsLanguageIsoAlpha2;
+begin
+  SetString(Result, PAnsiChar(@LANGUAGE_ISO2[ALanguage]), 2);
+end;
 
-function TLanguage.Equals(ALanguage: TLanguage): Boolean;
+function GetLanguageIdentifierIsoAlpha3T(ALanguage: TGsLanguageIdentifier): TGsLanguageIsoAlpha3T;
+begin
+  SetString(Result, PAnsiChar(@LANGUAGE_ISO3T[ALanguage]), 3);
+end;
+
+function GetLanguageIdentifierIsoAlpha3B(ALanguage: TGsLanguageIdentifier): TGsLanguageIsoAlpha3B;
+begin
+  SetString(Result, PAnsiChar(@LANGUAGE_ISO3B[ALanguage]), 3);
+end;
+
+function GetLanguageIdentifierCaptionEnglish(ALanguage: TGsLanguageIdentifier): string;
+begin
+  Result := LoadResString(LANGUAGE_NAME_EN[ALanguage]);
+end;
+
+function GetLanguageIdentifierCaptionNative(ALanguage: TGsLanguageIdentifier): string;
+begin
+  Result := LoadResString(LANGUAGE_NAME_NATIVE[ALanguage]);
+end;
+
+function GetLanguageIdentifierResEnglish(ALanguage: TGsLanguageIdentifier): PResStringRec;
+begin
+  Result := LANGUAGE_NAME_EN[ALanguage];
+end;
+
+function GetLanguageIdentifierResNative(ALanguage: TGsLanguageIdentifier): PResStringRec;
+begin
+  Result := LANGUAGE_NAME_NATIVE[ALanguage];
+end;
+
+{ TGsLanguage }
+
+function TGsLanguage.Equals(ALanguage: TGsLanguage): Boolean;
 begin
   if (Self = nil) or (ALanguage = nil) then
     Result := ALanguage = Self
@@ -837,65 +882,79 @@ begin
     Result := ALanguage.FIso = FIso;
 end;
 
-function TLanguage.GetEnglish: RawUTF8;
+function TGsLanguage.GetEnglish: RawUTF8;
 begin
-  Result := LoadResString(LANGUAGE_NAME_EN[Identifier]);
+  Result := RawUTF8(LoadResString(LANGUAGE_NAME_EN[Identifier]));
 end;
 
-function TLanguage.GetIdentifier: TLanguageIdentifier;
+function TGsLanguage.GetIdentifier: TGsLanguageIdentifier;
 begin
 
 end;
 
-function TLanguage.GetIsoAlpha2: TLanguageIsoAlpha2;
+function TGsLanguage.GetIsoAlpha2: TGsLanguageIsoAlpha2;
 begin
   SetString(Result, PAnsiChar(@LANGUAGE_ISO2[GetIdentifier]), 2);
 end;
 
-function TLanguage.GetIsoAlpha3B: TLanguageIsoAlpha3B;
+function TGsLanguage.GetIsoAlpha3B: TGsLanguageIsoAlpha3B;
 begin
   SetString(Result, PAnsiChar(@LANGUAGE_ISO3B[GetIdentifier]), 3);
 end;
 
-function TLanguage.GetIsoAlpha3T: TLanguageIsoAlpha3T;
+function TGsLanguage.GetIsoAlpha3T: TGsLanguageIsoAlpha3T;
 begin
   SetString(Result, PAnsiChar(@LANGUAGE_ISO3T[GetIdentifier]), 3);
 end;
 
-function TLanguage.GetLangID: LANGID;
+function TGsLanguage.GetLangID: LANGID;
 begin
-  Result := LocaleByISO6391Code(Alpha2);
+  Result := LocaleByISO6391Code(string(Alpha2));
 end;
 
-function TLanguage.GetNative: RawUTF8;
+function TGsLanguage.GetNative: RawUTF8;
 begin
-  Result := LoadResString(LANGUAGE_NAME_NATIVE[Identifier]);
+  Result := RawUTF8(LoadResString(LANGUAGE_NAME_NATIVE[Identifier]));
 end;
 
-procedure TLanguage.SetIdentifier(const Value: TLanguageIdentifier);
-begin
-
-end;
-
-procedure TLanguage.SetIsoAlpha2(const Value: TLanguageIsoAlpha2);
+procedure TGsLanguage.SetIdentifier(const Value: TGsLanguageIdentifier);
 begin
 
 end;
 
-procedure TLanguage.SetIsoAlpha3B(const Value: TLanguageIsoAlpha3B);
+procedure TGsLanguage.SetIsoAlpha2(const Value: TGsLanguageIsoAlpha2);
 begin
 
 end;
 
-procedure TLanguage.SetIsoAlpha3T(const Value: TLanguageIsoAlpha3T);
+procedure TGsLanguage.SetIsoAlpha3B(const Value: TGsLanguageIsoAlpha3B);
 begin
 
 end;
 
-procedure TLanguage.SetLangID(const Value: LANGID);
+procedure TGsLanguage.SetIsoAlpha3T(const Value: TGsLanguageIsoAlpha3T);
 begin
 
 end;
 
+procedure TGsLanguage.SetLangID(const Value: LANGID);
+begin
+
+end;
+
+initialization
+  Initialize;
+  (*
+  {$ifndef ISDELPHI2010}
+  {$ifndef HASINTERFACERTTI} // circumvent a old FPC bug
+  TTextWriter.RegisterCustomJSONSerializerFromTextSimpleType(TypeInfo(TDomUserEmailValidation));
+  TTextWriter.RegisterCustomJSONSerializerFromTextSimpleType(TypeInfo(TCountryIdentifier));
+  {$endif}
+  {$endif}
+  TJSONSerializer.RegisterObjArrayForJSON([
+    TypeInfo(TAddressObjArray),TAddress,
+    TypeInfo(TPersonContactableObjArray),TPersonContactable,
+    TypeInfo(TUserObjArray),TUser]);
+  *)
 end.
 
