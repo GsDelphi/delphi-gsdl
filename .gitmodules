@@ -4,3 +4,6 @@
 [submodule "thirdparty/Synopse/mORMot"]
 	path = thirdparty/Synopse/mORMot
 	url = https://github.com/gilbertsoft/mORMot.git
+[submodule "ThirdParty/JackTrapper/Argon2"]
+	path = ThirdParty/JackTrapper/Argon2
+	url = https://github.com/gilbertsoft/delphi-argon2.git
