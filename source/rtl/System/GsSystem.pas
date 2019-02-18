@@ -19,6 +19,7 @@
 }
 unit GsSystem;
 
+{$I gsdl.inc}
 {$R-} { Disable range checks }
 
 interface
