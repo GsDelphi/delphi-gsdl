@@ -33,15 +33,14 @@ type
 
     { TAbstractBPSettings }
     procedure CreateProperties; override;
-
-    { Properties }
+  public
+    { Settings properties }
     property _Address: TBPSPString read FAddress;
     property _FullName: TBPSPString read FFullName;
-  public
-    { Properties }
+
+    { Easy property access }
     property Address: string read GetAddress write SetAddress;
     property FullName: string read GetFullName write SetFullName;
-  published
   end;
 
   TGsSEmailAddressItem = class(TAbstractBPSettingsPropertyListItem)
@@ -61,10 +60,6 @@ type
 
     { IBPSettingsEditorSupport }
     function GetCaption: TCaption; override;
-
-    { Properties }
-    property _Address: TBPSPString read FAddress;
-    property _FullName: TBPSPString read FFullName;
   public
     constructor CreateEmailAddress(AOwner: TGsSEmailAddressList;
       AAddress: string = ''; AFullName: string = '';
@@ -72,10 +67,13 @@ type
     constructor CreateItem(AOwner: TBPSettingsPropertyList;
       AImageIndex: TImageIndex = -1); override;
 
-    { Properties }
+    { Settings properties }
+    property _Address: TBPSPString read FAddress;
+    property _FullName: TBPSPString read FFullName;
+
+    { Easy property access }
     property Address: string read GetAddress write SetAddress;
     property FullName: string read GetFullName write SetFullName;
-  published
   end;
 
   TGsSEmailAddressList = class(TBPSettingsPropertyList)
@@ -101,9 +99,6 @@ type
   protected
     { TAbstractBPSettings }
     procedure CreateProperties; override;
-
-    { Properties }
-    property _LoggingLevel: TGsSPLoggingLevel read FLoggingLevel;
   public
     constructor CreateNotificationItem(AOwner: TGsSNotificationList;
       AAddress: string = ''; AFullName: string = '';
@@ -113,7 +108,10 @@ type
       AAddress: string = ''; AFullName: string = '';
       AImageIndex: TImageIndex = -1); override;
 
-    { Properties }
+    { Settings properties }
+    property _LoggingLevel: TGsSPLoggingLevel read FLoggingLevel;
+
+    { Easy property access }
     property LoggingLevel: TGsSyslogMessageSeverity
       read GetLoggingLevel write SetLoggingLevel;
   end;
@@ -360,3 +358,4 @@ begin
 end;
 
 end.
+
