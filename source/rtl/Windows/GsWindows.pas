@@ -47,10 +47,12 @@ end;
 function GetComputerNameEx(AFormat: TComputerNameFormat): string;
 var
   Size: DWORD;
+  Dummy: Char;
 begin
   if (LComputerName[AFormat] = '') then
   begin
-    Windows.GetComputerNameEx(AFormat, nil, Size);
+    Size := 0;
+    Windows.GetComputerNameEx(AFormat, @Dummy, Size);
 
     SetLength(LComputerName[AFormat], Size);
 
@@ -67,10 +69,12 @@ end;
 function GetUserName: string;
 var
   Size: DWORD;
+  Dummy: Char;
 begin
   if (LUserName = '') then
   begin
-    Windows.GetUserName(nil, Size);
+    Size := 0;
+    Windows.GetUserName(@Dummy, Size);
 
     SetLength(LUserName, Size);
 
