@@ -10,6 +10,7 @@ uses
   Classes,
   IdAssignedNumbers,
   IdExplicitTLSClientServerBase,
+  GsSIdTLS,
   {$IFDEF HAS_UNIT_SYSTEM_UITYPES}UITypes{$ELSE}ImgList{$ENDIF};
 
 type
@@ -61,36 +62,9 @@ type
     property Password: String read GetPassword write SetPassword;
   end;
 
-  TBPSPIdUseTLS = class(TCustomBPSettingsEnumProperty,
-    IBPSettingsEditorOrdinalPropertySupport,
-    IBPSettingsEditorEnumPropertySupport,
-    IBPSettingsEditorComboBoxSupport)
-  private
-    FValue:        TIdUseTLS;
-    FDefaultValue: TIdUseTLS;
-  protected
-    { IBPSettingsEditorEnumPropertySupport }
-    //function GetEnumCaptionLocalized(AEnumValue: Longint): String; override;
-
-    { TBPSPIdUseTLS }
-    function GetDefaultValue: TIdUseTLS; virtual;
-    function GetValue: TIdUseTLS; virtual;
-    procedure SetDefaultValue(const Value: TIdUseTLS); virtual;
-    procedure SetValue(const Value: TIdUseTLS); virtual;
-  public
-    constructor CreateIdUseTLS(AOwner: TCustomBPSettings; AName: String;
-      CaptionRes, HintRes: PResStringRec; ADefaultValue: TIdUseTLS = DEF_USETLS);
-      virtual;
-    constructor Create(AOwner: TCustomBPSettings; AName: String;
-      CaptionRes, HintRes: PResStringRec; AImageIndex: TImageIndex = -1); override;
-  published
-    property Value: TIdUseTLS read GetValue write SetValue;
-    property DefaultValue: TIdUseTLS read GetDefaultValue write SetDefaultValue;
-  end;
-
   TGsSIdSmtp = class(TGsSSmtp)
   private
-    FUseTLS:        TBPSPIdUseTLS;
+    FUseTLS:        TGsSPIdUseTLS;
     FDefaultUseTLS: TIdUseTLS;
     function GetUseTLS: TIdUseTLS;
     procedure SetUseTLS(const Value: TIdUseTLS);
@@ -106,10 +80,11 @@ type
       ADefaultPort: Word = Id_PORT_submission; ADefaultUsername: String = '';
       ADefaultPassword: String = ''; ADefaultUseTLS: TIdUseTLS = DEF_USETLS); virtual;
 
-    { TGsSIdSmtp }
+    { Settings properties }
+    property _UseTLS: TGsSPIdUseTLS read FUseTLS;
+
+    { Easy property access }
     property UseTLS: TIdUseTLS read GetUseTLS write SetUseTLS;
-  published
-    property _UseTLS: TBPSPIdUseTLS read FUseTLS;
   end;
 
 implementation
@@ -145,9 +120,9 @@ end;
 procedure TGsSSmtp.CreateProperties;
 resourcestring
   SHost = 'Hostname';
-  SHostHint = 'Name des SMTP Server für den Versand.';
+  SHostHint = 'Name des SMTP Servers für den Versand.';
   SPort = 'Port';
-  SPortHint = 'TCP Port des SMTP Server für den Versand.';
+  SPortHint = 'TCP Port des SMTP Servers für den Versand.';
   SUsername = 'Benutzername';
   SUsernameHint = 'Name des Benutzers für den Versand.';
   SPassword = 'Kennwort';
@@ -215,47 +190,6 @@ begin
   _Username.Value := Value;
 end;
 
-{ TBPSPIdUseTLS }
-
-constructor TBPSPIdUseTLS.Create(AOwner: TCustomBPSettings; AName: String;
-  CaptionRes, HintRes: PResStringRec; AImageIndex: TImageIndex);
-begin
-  CreateIdUseTLS(AOwner, AName, CaptionRes, HintRes);
-end;
-
-constructor TBPSPIdUseTLS.CreateIdUseTLS(AOwner: TCustomBPSettings;
-  AName: String; CaptionRes, HintRes: PResStringRec; ADefaultValue: TIdUseTLS);
-begin
-  inherited Create(AOwner, AName, CaptionRes, HintRes);
-
-  FValue := ADefaultValue;
-  FDefaultValue := ADefaultValue;
-end;
-
-function TBPSPIdUseTLS.GetDefaultValue: TIdUseTLS;
-begin
-  Result := FDefaultValue;
-end;
-
-function TBPSPIdUseTLS.GetValue: TIdUseTLS;
-begin
-  Result := FValue;
-end;
-
-procedure TBPSPIdUseTLS.SetDefaultValue(const Value: TIdUseTLS);
-begin
-  FDefaultValue := Value;
-end;
-
-procedure TBPSPIdUseTLS.SetValue(const Value: TIdUseTLS);
-begin
-  if (Value <> FValue) then
-  begin
-    FValue := Value;
-    Change;
-  end;
-end;
-
 { TGsSIdSmtp }
 
 procedure TGsSIdSmtp.AssignTo(Dest: TPersistent);
@@ -289,7 +223,7 @@ resourcestring
 begin
   inherited;
 
-  FUseTLS := TBPSPIdUseTLS.CreateIdUseTLS(Self, 'UseTLS', @SUseTLS,
+  FUseTLS := TGsSPIdUseTLS.CreateIdUseTLS(Self, 'UseTLS', @SUseTLS,
     @SUseTLSHint, FDefaultUseTLS);
 end;
 
@@ -304,3 +238,4 @@ begin
 end;
 
 end.
+
