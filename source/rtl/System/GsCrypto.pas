@@ -51,7 +51,7 @@ const
 var
   DEFAULT_FORMAT_CLASS: TDECFormatClass = TFormat_Copy;
   DEFAULT_CIPHER_CLASS: TDECCipherClass = TCipher_Rijndael;
-  DEFAULT_HASH_CLASS: TDECHashClass = THash_Whirlpool;
+  DEFAULT_HASH_CLASS:   TDECHashClass = THash_Whirlpool;
 
 { Crypto functions }
 
@@ -225,12 +225,19 @@ procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
   AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
+
+function HashPassword(const Password: UnicodeString): string; overload;
+//function HashPassword(const Password: UnicodeString; const Iterations, MemorySizeKB, Parallelism: Integer): string; overload;
+function CheckPassword(const Password: UnicodeString; const ExpectedHashString: string;
+  out PasswordRehashNeeded: Boolean): Boolean; overload;
+
 implementation
 
-{$IFDEF USE_CODESITE}uses
-{$IFDEF USE_CODESITE}BPLogging;
-
-{$ENDIF}{$ENDIF}
+uses
+  {$IFDEF USE_CODESITE}BPLogging,{$ENDIF}
+  Argon2,
+  JclSysInfo,
+  System.Diagnostics;
 
 resourcestring
   SErrorDecodingData = 'Fehler beim Dekodieren der Daten!';
@@ -913,5 +920,45 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('DecryptStream');{$ENDIF}
 end;
 
+var
+  HashIterations:  Integer;
+  HashMemorySizeKB: Integer;
+  HashParallelism: Integer;
+
+procedure InitHashing;
+var
+  Watch: TStopwatch;
+begin
+  HashParallelism := ProcessorCount * 2;
+  HashMemorySizeKB := 128 * 1024;
+  HashIterations := 10000;
+
+  Watch := TStopwatch.StartNew;
+  HashPassword('Test');
+  Watch.Stop;
+
+  while (Watch.ElapsedMilliseconds < 500) do
+  begin
+    HashIterations := HashIterations shl 1;
+    Watch.Start;
+    HashPassword('Test');
+    Watch.Stop;
+  end;
+end;
+
+function HashPassword(const Password: UnicodeString): string;
+begin
+  Result := TArgon2.HashPassword(Password, HashIterations, HashMemorySizeKB,
+    HashParallelism);
+end;
+
+function CheckPassword(const Password: UnicodeString; const ExpectedHashString: string;
+  out PasswordRehashNeeded: Boolean): Boolean; overload;
+begin
+  Result := TArgon2.CheckPassword(Password, ExpectedHashString, PasswordRehashNeeded);
+end;
+
+initialization
+  //InitHashing;
 end.
 
