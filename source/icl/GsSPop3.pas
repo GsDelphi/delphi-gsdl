@@ -71,7 +71,7 @@ type
     FDefaultValue: TIdPOP3AuthenticationType;
   protected
     { IBPSettingsEditorEnumPropertySupport }
-    //function GetEnumCaptionLocalized(AEnumValue: Longint): String; override;
+    function GetEnumCaptionLocalized(AEnumValue: Longint): string; override;
 
     { Property access }
     function GetDefaultValue: TIdPOP3AuthenticationType; virtual;
@@ -125,6 +125,16 @@ type
     property AutoLogin: Boolean read GetAutoLogin write SetAutoLogin;
     property UseTLS: TIdUseTLS read GetUseTLS write SetUseTLS;
   end;
+
+resourcestring
+  SUserPass = 'Benutzer / Passwort';
+  SAPOP     = 'APOP';
+  SSASL     = 'SASL';
+
+const
+  AUTH_TYPE_CAPTIONS: array[TIdPOP3AuthenticationType] of PResStringRec =
+    (@SUserPass, @SAPOP, @SSASL
+    );
 
 implementation
 
@@ -244,6 +254,11 @@ begin
   Result := FDefaultValue;
 end;
 
+function TGsSPIdPOP3AuthType.GetEnumCaptionLocalized(AEnumValue: Integer): string;
+begin
+  Result := LoadResString(AUTH_TYPE_CAPTIONS[TIdPOP3AuthenticationType(AEnumValue)]);
+end;
+
 function TGsSPIdPOP3AuthType.GetValue: TIdPOP3AuthenticationType;
 begin
   Result := FValue;
@@ -273,9 +288,9 @@ begin
   begin
     with TIdPOP3(Dest) do
     begin
-      AuthType := Self.AuthType;
+      AuthType  := Self.AuthType;
       AutoLogin := Self.AutoLogin;
-      UseTLS   := Self.UseTLS;
+      UseTLS    := Self.UseTLS;
     end;
   end;
 end;
