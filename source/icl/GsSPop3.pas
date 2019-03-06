@@ -41,7 +41,7 @@ type
     procedure CreateProperties; override;
   public
     constructor CreatePop3(AOwner: TCustomBPSettings; AName: string; CaptionRes, HintRes: PResStringRec;
-      ADefaultHost: string = ''; ADefaultPort: Word = Id_PORT_submission; ADefaultUsername: string = '';
+      ADefaultHost: string = ''; ADefaultPort: Word = IdPORT_POP3; ADefaultUsername: string = '';
       ADefaultPassword: string = ''); virtual;
     constructor Create(AOwner: TCustomBPSettings; AName: string; CaptionRes, HintRes: PResStringRec;
       AImageIndex: TImageIndex = -1); override;
@@ -184,42 +184,42 @@ end;
 
 function TGsSPop3.GetHost: string;
 begin
-  Result := _Host.Value;
+  Result := FHost.Value;
 end;
 
 function TGsSPop3.GetPassword: string;
 begin
-  Result := _Password.Value;
+  Result := FPassword.Value;
 end;
 
 function TGsSPop3.GetPort: Word;
 begin
-  Result := _Port.Value;
+  Result := FPort.Value;
 end;
 
 function TGsSPop3.GetUsername: string;
 begin
-  Result := _Username.Value;
+  Result := FUsername.Value;
 end;
 
 procedure TGsSPop3.SetHost(const Value: string);
 begin
-  _Host.Value := Value;
+  FHost.Value := Value;
 end;
 
 procedure TGsSPop3.SetPassword(const Value: string);
 begin
-  _Password.Value := Value;
+  FPassword.Value := Value;
 end;
 
 procedure TGsSPop3.SetPort(const Value: Word);
 begin
-  _Port.Value := Value;
+  FPort.Value := Value;
 end;
 
 procedure TGsSPop3.SetUsername(const Value: string);
 begin
-  _Username.Value := Value;
+  FUsername.Value := Value;
 end;
 
 { TGsSPIdPOP3AuthType }
