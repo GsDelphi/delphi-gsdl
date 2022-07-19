@@ -450,7 +450,7 @@ function BaudRateToInt(Value: TGSBaudRate): DWORD;
 implementation
 
 uses
-  BPTimers, BPLogging, BPApp, BPUtils, Math, BPSystem, BPSysUtils;
+  BPTimers, BPLogging, BPApp, BPUtils, Math, BPSystem, BPSysUtils, GsSysUtils;
 
 const
 	BAUD_RATES: array [TGSBaudRate] of DWORD = (
@@ -698,10 +698,12 @@ begin
     Classes.DeallocateHWnd(FWindowHandle);
     
     { terminate event thread }
+    (*
     FEventThread.Terminate;
 
     while FEventThread.Suspended do
       FEventThread.Resume;
+    *)
 
     FEventThread.Free;
 
@@ -845,8 +847,16 @@ begin
                          EV_RING) then
         RaiseLastError('SetCommMask');
 
+      (*
       while FEventThread.Suspended do
         FEventThread.Resume;
+      *)
+
+      if FEventThread.Suspended then
+      begin
+        FEventThread.Resume;
+        Sleep(10);
+      end;
     end;
   end
   else
@@ -1360,7 +1370,7 @@ begin
           Func := CLRDTR;
       end;
     else
-      raise EImplementationMissingError.CreateResFmt(@SErrorImplementationMissing, ['SetSignal', ClassName, IntToStr(Ord(ASignal))]);
+      RaiseNotImplementedError(EImplementationMissingError, 'SetSignal', Self, IntToStr(Ord(ASignal)));
     end;
 
     if not EscapeCommFunction(PortHandle, Func) then
@@ -1694,10 +1704,12 @@ begin
   FEvent.Free;
 
   { terminate communication thread }
+  (*
   FComThread.Terminate;
 
   while FComThread.Suspended do
     FComThread.Resume;
+  *)
 
   FComThread.Free;
 
@@ -2271,8 +2283,11 @@ begin
   FDataReceived.ResetEvent;
   FReceiveData.SetEvent;
 
-  while Suspended do
+  if Suspended then
+  begin
     Resume;
+    Sleep(10);
+  end;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'SetReceiveData');{$ENDIF}
 end;
@@ -2284,8 +2299,11 @@ begin
   FDataSent.ResetEvent;
   FSendData.SetEvent;
 
-  while Suspended do
+  if Suspended then
+  begin
     Resume;
+    Sleep(10);
+  end;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'SetSendData');{$ENDIF}
 end;

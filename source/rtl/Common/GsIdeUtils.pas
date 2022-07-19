@@ -138,7 +138,7 @@ begin
   try
     // This is a wierdo Windows way to pass the info in
     RaiseException(MS_VC_EXCEPTION, 0, SizeOf(LThreadNameInfo) div SizeOf(LongWord),
-      PDWord(@LThreadNameInfo));
+      PUINT_PTR(@LThreadNameInfo));
   except
   end;
   {$ENDIF}

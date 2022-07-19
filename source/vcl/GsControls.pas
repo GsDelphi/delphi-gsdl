@@ -40,25 +40,6 @@ uses
 *)
 
 type
-  TCustomAssignEnumProc = procedure(AControl: TControl;
-    ADescriptorInfo: TEnumDescriptorInfo; ADefaultValue: Integer);
-  PCustomAssignEnumProc = ^TCustomAssignEnumProc;
-
-  TAddItemProc = procedure(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
-    AValue: Integer; var Handled: Boolean);
-  PAddItemProc = ^TAddItemProc;
-
-procedure AssignEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
-  AValue: Integer = -1; AAddItemProc: PAddItemProc = nil);
-function GetSelectedEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
-  ADefaultValue: Integer = -1): Integer;
-
-procedure RegisterCustomAssignEnumProc(AControlClass: TControlClass;
-  CustomProc: PCustomAssignEnumProc);
-
-//    GetEnumName(TypeInfo: PTypeInfo; Value: Integer): string;
-
-type
   TGsChangeNotifier = class;
 
 
@@ -142,6 +123,7 @@ type
 implementation
 
 uses
+  ComCtrls,
   Dialogs,
   ExtCtrls,
   RzBtnEdt,
@@ -158,395 +140,6 @@ uses
 
 resourcestring
   SErrorControlNotRegistered = 'Klasse ''%s'' ist nicht registriert in %s';
-
-type
-  TCustomAssignEnumItem = record
-    ControlClass: TControlClass;
-    CustomProc: TCustomAssignEnumProc;
-  end;
-
-  PCustomAssignEnumItem = ^TCustomAssignEnumItem;
-
-  TCustomAssignEnumProcList = class(TList)
-  protected
-    procedure Notify(Ptr: Pointer; Action: TListNotification); override;
-  end;
-
-  TCustomAssignEnumList = class(TObject)
-  private
-    FList: TCustomAssignEnumProcList;
-    FLastFound: Integer;
-    function GetItem(Index: Integer): TCustomAssignEnumItem;
-  protected
-  public
-    constructor Create; virtual;
-    destructor Destroy; override;
-
-    function Add(AControlClass: TControlClass;
-      CustomProc: PCustomAssignEnumProc): Integer;
-    function Find(AControlClass: TControlClass; AExact: Boolean = False;
-      AStartAt: Integer = 0): Integer;
-    function LastFound: Integer;
-
-    property Items[Index: Integer]: TCustomAssignEnumItem read GetItem; default;
-  end;
-
-var
-  lItemsAssignedValue: Integer = 0;
-  CustomAssignEnumProcs: TCustomAssignEnumList = nil;
-
-
-procedure RaiseControlClassNotFound(AControl: TControl);
-
-  function ReturnAddr: Pointer;
-  asm
-    MOV     EAX,[EBP+4]
-  end;
-
-resourcestring
-  SErrorControlClassNotImplemented =
-    'Klasse ''%s'' ist nicht implementiert!';
-var
-  ClassPath: string;
-  ParentClass: TClass;
-begin
-  ClassPath := AControl.ClassName;
-  ParentClass := AControl.ClassParent;
-
-  while (ParentClass <> nil) do
-  begin
-    ClassPath := ClassPath + ' > ' + ParentClass.ClassName;
-    ParentClass := ParentClass.ClassParent;
-  end;
-
-  raise Exception.CreateResFmt(@SErrorControlClassNotImplemented, [ClassPath])
-  at ReturnAddr;
-end;
-
-procedure RaiseItemsNotAssigned(AControl: TControl);
-
-  function ReturnAddr: Pointer;
-  asm
-    MOV     EAX,[EBP+4]
-  end;
-
-resourcestring
-  SErrorItemsNotAssigned =
-    'Die Elemente von ''%s'' wurden nicht durch ''AssignEnum'' zugewiesen!';
-begin
-  raise Exception.CreateResFmt(@SErrorItemsNotAssigned, [AControl.Name]) at ReturnAddr;
-end;
-
-function GetItemsAssignedValue: Integer;
-begin
-  if (lItemsAssignedValue = 0) then
-    lItemsAssignedValue := Integer(GetTickCount);
-
-  Result := lItemsAssignedValue;
-end;
-
-procedure AssignEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
-  AValue: Integer; AAddItemProc: PAddItemProc);
-var
-  ItemsCount: Integer;
-  ItemsAssigned: Boolean;
-
-  function GetItemsCount: Integer;
-  var
-    I: Integer;
-  begin
-    if (ItemsCount = 0) then
-    begin
-      for I := 0 to ADescriptorInfo.Length - 1 do
-      begin
-        if (ADescriptorInfo.Descriptors^[Cardinal(I)].ItemIndex > -1) then
-          Inc(ItemsCount);
-      end;
-    end;
-
-    Result := ItemsCount;
-  end;
-
-  function AssignItems(Items: TStrings): Integer;
-
-    function GetItemIndex: Integer;
-    begin
-      Result := -1;
-
-      if (AValue >= 0) and (Cardinal(AValue) < ADescriptorInfo.Length) then
-        Result := ADescriptorInfo.Descriptors^[AValue].ItemIndex;
-    end;
-
-  resourcestring
-    SErrorIndexNotFound = 'Index %d wurde nicht gefunden!';
-  var
-    C, I{, L}: Integer;
-    J: Cardinal;
-    Handled: Boolean;
-  begin
-    Result := -1;
-
-    if ItemsAssigned then
-    begin
-      Result := GetItemIndex;
-      Exit;
-    end;
-
-    C := GetItemsCount;
-    //L := DescriptorsCount;
-
-    Items.Clear;
-    Items.Capacity := C;
-
-    for I := 0 to C - 1 do
-    begin
-      J := 0;
-
-      while (Cardinal(J) < ADescriptorInfo.Length) and
-        (ADescriptorInfo.Descriptors^[J].ItemIndex <> I) do
-        Inc(J);
-
-      if (J = ADescriptorInfo.Length) then
-        raise Exception.CreateResFmt(@SErrorIndexNotFound, [I]);
-
-      { TODO : allow adding the index or value e.g. "Caption (value)" }
-      Handled := False;
-      (*
-      if (AAddItemProc <> nil) then
-        @AAddItemProc(Items, J, Handled);
-      *)
-
-      if not Handled then
-      begin
-        Items.AddObject(LoadResString(ADescriptorInfo.Descriptors^[J].Caption),
-          TObject(J));
-
-        if (AValue > -1) and (J = Cardinal(AValue)) then
-          Result := I;
-      end;
-    end;
-  end;
-
-resourcestring
-  SErrorAssignEnum =
-    'Fehler ''%s'' in Prozedur ''AssignEnum'': %s';
-var
-  RzRadioGroup: TRzRadioGroup;
-  CustomCombo:  TCustomCombo;
-  CustomListBox: TCustomListBox;
-begin
-  try
-    { Important! Initialize cache variables }
-    ItemsCount := 0;
-    ItemsAssigned := AControl.Tag = GetItemsAssignedValue;
-
-    if Assigned(CustomAssignEnumProcs) and
-      (CustomAssignEnumProcs.Find(TControlClass(AControl.ClassType)) > -1) then
-    begin
-      CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
-        AControl, ADescriptorInfo, AValue);
-    end
-    else if AControl is TRzRadioGroup then
-    begin
-      RzRadioGroup := AControl as TRzRadioGroup;
-      RzRadioGroup.ItemIndex := AssignItems(RzRadioGroup.Items);
-    end
-    else if AControl is TCustomCombo then
-    begin
-      CustomCombo := AControl as TCustomCombo;
-      CustomCombo.ItemIndex := AssignItems(CustomCombo.Items);
-    end
-    else if AControl is TCustomListBox then
-    begin
-      CustomListBox := AControl as TCustomListBox;
-      CustomListBox.ItemIndex := AssignItems(CustomListBox.Items);
-    end
-    else
-    begin
-      RaiseControlClassNotFound(AControl);
-    end;
-
-    AControl.Tag := GetItemsAssignedValue;
-  except
-    on E: Exception do
-      raise Exception.CreateResFmt(@SErrorAssignEnum, [E.ClassName, E.Message]);
-  end;
-end;
-
-function GetSelectedEnum(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
-  ADefaultValue: Integer): Integer;
-
-  function GetDefaultValue: Cardinal;
-  var
-    I: Integer;
-  begin
-    if ADefaultValue > -1 then
-      Result := ADefaultValue
-    else
-    begin
-      Result := 0;
-
-      for I := 0 to ADescriptorInfo.Length - 1 do
-      begin
-        if (ADescriptorInfo.Descriptors^[I].ItemIndex = -1) then
-        begin
-          Result := I;
-          Exit;
-        end;
-      end;
-    end;
-  end;
-
-var
-  RzRadioGroup: TRzRadioGroup;
-  CustomCombo:  TCustomCombo;
-  CustomListBox: TCustomListBox;
-begin
-  Result := -1;
-
-  if (AControl.Tag <> GetItemsAssignedValue) then
-    RaiseItemsNotAssigned(AControl);
-
-  if Assigned(CustomAssignEnumProcs) and
-    (CustomAssignEnumProcs.Find(TControlClass(AControl.ClassType)) > -1) then
-  begin
-    { DONE 1 : implement }
-    CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
-      AControl, ADescriptorInfo, ADefaultValue);
-  end
-  else if AControl is TRzRadioGroup then
-  begin
-    RzRadioGroup := AControl as TRzRadioGroup;
-    if RzRadioGroup.ItemIndex > -1 then
-      Result := Cardinal(RzRadioGroup.Items.Objects[RzRadioGroup.ItemIndex])
-    else
-      Result := GetDefaultValue;
-  end
-  else if AControl is TCustomCombo then
-  begin
-    CustomCombo := AControl as TCustomCombo;
-    if CustomCombo.ItemIndex > -1 then
-      Result := Cardinal(CustomCombo.Items.Objects[CustomCombo.ItemIndex])
-    else
-      Result := GetDefaultValue;
-  end
-  else if AControl is TCustomListBox then
-  begin
-    CustomListBox := AControl as TCustomListBox;
-    if CustomListBox.ItemIndex > -1 then
-      Result := Cardinal(CustomListBox.Items.Objects[CustomListBox.ItemIndex])
-    else
-      Result := GetDefaultValue;
-  end
-  else
-  begin
-    RaiseControlClassNotFound(AControl);
-  end;
-end;
-
-procedure RegisterCustomAssignEnumProc(AControlClass: TControlClass;
-  CustomProc: PCustomAssignEnumProc);
-begin
-  if not Assigned(CustomAssignEnumProcs) then
-    CustomAssignEnumProcs := TCustomAssignEnumList.Create;
-
-  CustomAssignEnumProcs.Add(AControlClass, CustomProc);
-end;
-
-{ TCustomAssignEnumProcList }
-
-procedure TCustomAssignEnumProcList.Notify(Ptr: Pointer; Action: TListNotification);
-var
-  CustomAssignEnumItem: PCustomAssignEnumItem;
-begin
-  if Action = lnDeleted then
-  begin
-    CustomAssignEnumItem := Ptr;
-    Dispose(CustomAssignEnumItem);
-  end;
-
-  inherited Notify(Ptr, Action);
-end;
-
-{ TCustomAssignEnumList }
-
-function CustomAssignEnumListSortCompare(Item1, Item2: Pointer): Integer;
-begin
-  if PCustomAssignEnumItem(Item1)^.ControlClass.InheritsFrom(
-    PCustomAssignEnumItem(Item2)^.ControlClass) then
-    Result := -1
-  else if PCustomAssignEnumItem(Item2)^.ControlClass.InheritsFrom(
-    PCustomAssignEnumItem(Item1)^.ControlClass) then
-    Result := 1
-  else
-  begin
-    Result := CompareStr(PCustomAssignEnumItem(Item1)^.ControlClass.ClassName,
-      PCustomAssignEnumItem(Item2)^.ControlClass.ClassName);
-  end;
-end;
-
-function TCustomAssignEnumList.Add(AControlClass: TControlClass;
-  CustomProc: PCustomAssignEnumProc): Integer;
-resourcestring
-  SErrorClassAlreadyRegistered = 'Klasse ''%s'' ist bereits registriert!';
-var
-  CustomAssignEnumItem: PCustomAssignEnumItem;
-begin
-  if (Find(AControlClass, True) > -1) then
-    raise Exception.CreateResFmt(@SErrorClassAlreadyRegistered,
-      [AControlClass.ClassName]);
-
-  New(CustomAssignEnumItem);
-  CustomAssignEnumItem^.ControlClass := AControlClass;
-  CustomAssignEnumItem^.CustomProc := CustomProc^;
-
-  FList.Add(CustomAssignEnumItem);
-  FList.Sort(CustomAssignEnumListSortCompare);
-
-  Result := FList.IndexOf(CustomAssignEnumItem);
-end;
-
-constructor TCustomAssignEnumList.Create;
-begin
-  inherited Create;
-
-  FList := TCustomAssignEnumProcList.Create;
-end;
-
-destructor TCustomAssignEnumList.Destroy;
-begin
-  FList.Free;
-
-  inherited;
-end;
-
-function TCustomAssignEnumList.Find(AControlClass: TControlClass;
-  AExact: Boolean; AStartAt: Integer): Integer;
-var
-  I: Integer;
-begin
-  FLastFound := -1;
-
-  for I := AStartAt to FList.Count - 1 do
-    if (AExact and (Items[I].ControlClass = AControlClass)) or
-      (not AExact and Items[I].ControlClass.InheritsFrom(AControlClass)) then
-    begin
-      FLastFound := I;
-      Break;
-    end;
-
-  Result := FLastFound;
-end;
-
-function TCustomAssignEnumList.GetItem(Index: Integer): TCustomAssignEnumItem;
-begin
-  Result := PCustomAssignEnumItem(FList.Items[Index])^;
-end;
-
-function TCustomAssignEnumList.LastFound: Integer;
-begin
-  Result := FLastFound;
-end;
 
 { TGsChangeNotifier }
 
@@ -574,8 +167,9 @@ begin
         // |    |    |    |- TCustomListBox
         // |    |    |    |- TCustomListView
         // |    |    |- TCustomCombo
-        // |    |- TCustomControl
-        // |         |- TCustomPanel
+        // |    |- TCustomControl    TCustomHeaderControl
+        // |    |    |- TCustomPanel
+        // |    |- TCustomHeaderControl
         // |- TGraphicControl
         // |- TCustomLabel
 
@@ -585,8 +179,8 @@ begin
           ((Components[I] is TCustomMultiSelectListControl) or
           (Components[I] is TCustomPanel) or (Components[I] is TCustomLabel) or
           (Components[I] is TRzSpacer) or (Components[I] is TRzToolButton) or
-          (Components[I] is TRzToolButton) or (Components[I] is TRzCustomButton))
-        then
+          (Components[I] is TRzToolButton) or (Components[I] is TRzCustomButton) or
+          (Components[I] is TCustomHeaderControl)) then
         begin
           Continue;
         end;
@@ -909,4 +503,413 @@ begin
 end;
 
 end.
+
+type
+  TCustomAssignEnumProc = procedure(AControl: TControl;
+    ADescriptorInfo: TGsEnumInfo; ADefaultValue: Integer);
+  PCustomAssignEnumProc = ^TCustomAssignEnumProc;
+
+  TAddItemProc = procedure(AControl: TControl; ADescriptorInfo: TGsEnumInfo;
+    AValue: Integer; var Handled: Boolean);
+  //PAddItemProc = ^TAddItemProc;
+
+procedure AssignEnum1(AControl: TControl; ADescriptorInfo: TGsEnumInfo;
+  AValue: Integer = -1; AAddItemProc: TAddItemProc = nil);
+function GetSelectedEnum1(AControl: TControl; ADescriptorInfo: TGsEnumInfo;
+  ADefaultValue: Integer = -1): Integer;
+
+procedure RegisterCustomAssignEnumProc1(AControlClass: TControlClass;
+  CustomProc: PCustomAssignEnumProc);
+
+//    GetEnumName(TypeInfo: PTypeInfo; Value: Integer): string;
+
+type
+  TCustomAssignEnumItem = record
+    ControlClass: TControlClass;
+    CustomProc: TCustomAssignEnumProc;
+  end;
+
+  PCustomAssignEnumItem = ^TCustomAssignEnumItem;
+
+  TCustomAssignEnumProcList = class(TList)
+  protected
+    procedure Notify(Ptr: Pointer; Action: TListNotification); override;
+  end;
+
+  TCustomAssignEnumList = class(TObject)
+  private
+    FList: TCustomAssignEnumProcList;
+    FLastFound: Integer;
+    function GetItem(Index: Integer): TCustomAssignEnumItem;
+  protected
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    function Add(AControlClass: TControlClass;
+      CustomProc: PCustomAssignEnumProc): Integer;
+    function Find(AControlClass: TControlClass; AExact: Boolean = False;
+      AStartAt: Integer = 0): Integer;
+    function LastFound: Integer;
+
+    property Items[Index: Integer]: TCustomAssignEnumItem read GetItem; default;
+  end;
+
+var
+  lItemsAssignedValue: Integer = 0;
+  CustomAssignEnumProcs: TCustomAssignEnumList = nil;
+
+
+procedure RaiseControlClassNotFound(AControl: TControl);
+
+  function ReturnAddr: Pointer;
+  asm
+    MOV     EAX,[EBP+4]
+  end;
+
+resourcestring
+  SErrorControlClassNotImplemented =
+    'Klasse ''%s'' ist nicht implementiert!';
+var
+  ClassPath: string;
+  ParentClass: TClass;
+begin
+  ClassPath := AControl.ClassName;
+  ParentClass := AControl.ClassParent;
+
+  while (ParentClass <> nil) do
+  begin
+    ClassPath := ClassPath + ' > ' + ParentClass.ClassName;
+    ParentClass := ParentClass.ClassParent;
+  end;
+
+  raise Exception.CreateResFmt(@SErrorControlClassNotImplemented, [ClassPath])
+  at ReturnAddr;
+end;
+
+procedure RaiseItemsNotAssigned(AControl: TControl);
+
+  function ReturnAddr: Pointer;
+  asm
+    MOV     EAX,[EBP+4]
+  end;
+
+resourcestring
+  SErrorItemsNotAssigned =
+    'Die Elemente von ''%s'' wurden nicht durch ''AssignEnum'' zugewiesen!';
+begin
+  raise Exception.CreateResFmt(@SErrorItemsNotAssigned, [AControl.Name]) at ReturnAddr;
+end;
+
+function GetItemsAssignedValue: Integer;
+begin
+  if (lItemsAssignedValue = 0) then
+    lItemsAssignedValue := Integer(GetTickCount);
+
+  Result := lItemsAssignedValue;
+end;
+
+procedure AssignEnum1(AControl: TControl; ADescriptorInfo: TGsEnumInfo;
+  AValue: Integer; AAddItemProc: TAddItemProc);
+var
+  ItemsCount: Integer;
+  ItemsAssigned: Boolean;
+
+  function GetItemsCount: Integer;
+  var
+    I: Integer;
+  begin
+    if (ItemsCount = 0) then
+    begin
+      for I := 0 to ADescriptorInfo.Length - 1 do
+      begin
+        if (ADescriptorInfo.Descriptors^[Cardinal(I)].ItemIndex > -1) then
+          Inc(ItemsCount);
+      end;
+    end;
+
+    Result := ItemsCount;
+  end;
+
+  function AssignItems(Items: TStrings): Integer;
+
+    function GetItemIndex: Integer;
+    begin
+      Result := -1;
+
+      if (AValue >= 0) and (Cardinal(AValue) < ADescriptorInfo.Length) then
+        Result := ADescriptorInfo.Descriptors^[AValue].ItemIndex;
+    end;
+
+  resourcestring
+    SErrorIndexNotFound = 'Index %d wurde nicht gefunden!';
+  var
+    C, I{, L}: Integer;
+    J: Cardinal;
+    Handled: Boolean;
+  begin
+    Result := -1;
+
+    if ItemsAssigned then
+    begin
+      Result := GetItemIndex;
+      Exit;
+    end;
+
+    C := GetItemsCount;
+    //L := DescriptorsCount;
+
+    Items.Clear;
+    Items.Capacity := C;
+
+    for I := 0 to C - 1 do
+    begin
+      J := 0;
+
+      while (Cardinal(J) < ADescriptorInfo.Length) and
+        (ADescriptorInfo.Descriptors^[J].ItemIndex <> I) do
+        Inc(J);
+
+      if (J = ADescriptorInfo.Length) then
+        raise Exception.CreateResFmt(@SErrorIndexNotFound, [I]);
+
+      { TODO : allow adding the index or value e.g. "Caption (value)" }
+      Handled := False;
+      (*
+      if (AAddItemProc <> nil) then
+        @AAddItemProc(Items, J, Handled);
+      *)
+
+      if not Handled then
+      begin
+        Items.AddObject(LoadResString(ADescriptorInfo.Descriptors^[J].Caption),
+          TObject(J));
+
+        if (AValue > -1) and (J = Cardinal(AValue)) then
+          Result := I;
+      end;
+    end;
+  end;
+
+resourcestring
+  SErrorAssignEnum =
+    'Fehler ''%s'' in Prozedur ''AssignEnum'': %s';
+var
+  RzRadioGroup: TRzRadioGroup;
+  CustomCombo:  TCustomCombo;
+  CustomListBox: TCustomListBox;
+begin
+  try
+    { Important! Initialize cache variables }
+    ItemsCount := 0;
+    ItemsAssigned := AControl.Tag = GetItemsAssignedValue;
+
+    if Assigned(CustomAssignEnumProcs) and
+      (CustomAssignEnumProcs.Find(TControlClass(AControl.ClassType)) > -1) then
+    begin
+      CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
+        AControl, ADescriptorInfo, AValue);
+    end
+    else if AControl is TRzRadioGroup then
+    begin
+      RzRadioGroup := AControl as TRzRadioGroup;
+      RzRadioGroup.ItemIndex := AssignItems(RzRadioGroup.Items);
+    end
+    else if AControl is TCustomCombo then
+    begin
+      CustomCombo := AControl as TCustomCombo;
+      CustomCombo.ItemIndex := AssignItems(CustomCombo.Items);
+    end
+    else if AControl is TCustomListBox then
+    begin
+      CustomListBox := AControl as TCustomListBox;
+      CustomListBox.ItemIndex := AssignItems(CustomListBox.Items);
+    end
+    else
+    begin
+      RaiseControlClassNotFound(AControl);
+    end;
+
+    AControl.Tag := GetItemsAssignedValue;
+  except
+    on E: Exception do
+      raise Exception.CreateResFmt(@SErrorAssignEnum, [E.ClassName, E.Message]);
+  end;
+end;
+
+function GetSelectedEnum1(AControl: TControl; ADescriptorInfo: TEnumDescriptorInfo;
+  ADefaultValue: Integer): Integer;
+
+  function GetDefaultValue: Cardinal;
+  var
+    I: Integer;
+  begin
+    if ADefaultValue > -1 then
+      Result := ADefaultValue
+    else
+    begin
+      Result := 0;
+
+      for I := 0 to ADescriptorInfo.Length - 1 do
+      begin
+        if (ADescriptorInfo.Descriptors^[I].ItemIndex = -1) then
+        begin
+          Result := I;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
+var
+  RzRadioGroup: TRzRadioGroup;
+  CustomCombo:  TCustomCombo;
+  CustomListBox: TCustomListBox;
+begin
+  Result := -1;
+
+  if (AControl.Tag <> GetItemsAssignedValue) then
+    RaiseItemsNotAssigned(AControl);
+
+  if Assigned(CustomAssignEnumProcs) and
+    (CustomAssignEnumProcs.Find(TControlClass(AControl.ClassType)) > -1) then
+  begin
+    { DONE 1 : implement }
+    CustomAssignEnumProcs.Items[CustomAssignEnumProcs.LastFound].CustomProc(
+      AControl, ADescriptorInfo, ADefaultValue);
+  end
+  else if AControl is TRzRadioGroup then
+  begin
+    RzRadioGroup := AControl as TRzRadioGroup;
+    if RzRadioGroup.ItemIndex > -1 then
+      Result := Cardinal(RzRadioGroup.Items.Objects[RzRadioGroup.ItemIndex])
+    else
+      Result := GetDefaultValue;
+  end
+  else if AControl is TCustomCombo then
+  begin
+    CustomCombo := AControl as TCustomCombo;
+    if CustomCombo.ItemIndex > -1 then
+      Result := Cardinal(CustomCombo.Items.Objects[CustomCombo.ItemIndex])
+    else
+      Result := GetDefaultValue;
+  end
+  else if AControl is TCustomListBox then
+  begin
+    CustomListBox := AControl as TCustomListBox;
+    if CustomListBox.ItemIndex > -1 then
+      Result := Cardinal(CustomListBox.Items.Objects[CustomListBox.ItemIndex])
+    else
+      Result := GetDefaultValue;
+  end
+  else
+  begin
+    RaiseControlClassNotFound(AControl);
+  end;
+end;
+
+procedure RegisterCustomAssignEnumProc1(AControlClass: TControlClass;
+  CustomProc: PCustomAssignEnumProc);
+begin
+  if not Assigned(CustomAssignEnumProcs) then
+    CustomAssignEnumProcs := TCustomAssignEnumList.Create;
+
+  CustomAssignEnumProcs.Add(AControlClass, CustomProc);
+end;
+
+{ TCustomAssignEnumProcList }
+
+procedure TCustomAssignEnumProcList.Notify(Ptr: Pointer; Action: TListNotification);
+var
+  CustomAssignEnumItem: PCustomAssignEnumItem;
+begin
+  if Action = lnDeleted then
+  begin
+    CustomAssignEnumItem := Ptr;
+    Dispose(CustomAssignEnumItem);
+  end;
+
+  inherited Notify(Ptr, Action);
+end;
+
+{ TCustomAssignEnumList }
+
+function CustomAssignEnumListSortCompare(Item1, Item2: Pointer): Integer;
+begin
+  if PCustomAssignEnumItem(Item1)^.ControlClass.InheritsFrom(
+    PCustomAssignEnumItem(Item2)^.ControlClass) then
+    Result := -1
+  else if PCustomAssignEnumItem(Item2)^.ControlClass.InheritsFrom(
+    PCustomAssignEnumItem(Item1)^.ControlClass) then
+    Result := 1
+  else
+  begin
+    Result := CompareStr(PCustomAssignEnumItem(Item1)^.ControlClass.ClassName,
+      PCustomAssignEnumItem(Item2)^.ControlClass.ClassName);
+  end;
+end;
+
+function TCustomAssignEnumList.Add(AControlClass: TControlClass;
+  CustomProc: PCustomAssignEnumProc): Integer;
+resourcestring
+  SErrorClassAlreadyRegistered = 'Klasse ''%s'' ist bereits registriert!';
+var
+  CustomAssignEnumItem: PCustomAssignEnumItem;
+begin
+  if (Find(AControlClass, True) > -1) then
+    raise Exception.CreateResFmt(@SErrorClassAlreadyRegistered,
+      [AControlClass.ClassName]);
+
+  New(CustomAssignEnumItem);
+  CustomAssignEnumItem^.ControlClass := AControlClass;
+  CustomAssignEnumItem^.CustomProc := CustomProc^;
+
+  FList.Add(CustomAssignEnumItem);
+  FList.Sort(CustomAssignEnumListSortCompare);
+
+  Result := FList.IndexOf(CustomAssignEnumItem);
+end;
+
+constructor TCustomAssignEnumList.Create;
+begin
+  inherited Create;
+
+  FList := TCustomAssignEnumProcList.Create;
+end;
+
+destructor TCustomAssignEnumList.Destroy;
+begin
+  FList.Free;
+
+  inherited;
+end;
+
+function TCustomAssignEnumList.Find(AControlClass: TControlClass;
+  AExact: Boolean; AStartAt: Integer): Integer;
+var
+  I: Integer;
+begin
+  FLastFound := -1;
+
+  for I := AStartAt to FList.Count - 1 do
+    if (AExact and (Items[I].ControlClass = AControlClass)) or
+      (not AExact and Items[I].ControlClass.InheritsFrom(AControlClass)) then
+    begin
+      FLastFound := I;
+      Break;
+    end;
+
+  Result := FLastFound;
+end;
+
+function TCustomAssignEnumList.GetItem(Index: Integer): TCustomAssignEnumItem;
+begin
+  Result := PCustomAssignEnumItem(FList.Items[Index])^;
+end;
+
+function TCustomAssignEnumList.LastFound: Integer;
+begin
+  Result := FLastFound;
+end;
+
 

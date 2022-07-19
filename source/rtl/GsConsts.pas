@@ -34,9 +34,26 @@ unit GsConsts;
 interface
 
 const
-  AUTHOR_COMPANY = 'Gilbertsoft GmbH';
-  AUTHOR_NAME = 'Simon Gilli';
+  AUTHOR_COMPANY  = 'Gilbertsoft GmbH';
+  AUTHOR_NAME     = 'Simon Gilli';
   PRODUCT_VERSION = '0.0.0.0';
+
+resourcestring
+  SErrorNotImplemented  = '''%0:s'' ist nicht vollständig implementiert in ''%1:s'' (''%2:s'')';
+  SErrorInvalidOwner    =
+    'Ungültiger Eigentümer ''%0:s'' für Klasse ''%1:s''. Eigentümer muss vom Typ ''%2:s'' sein';
+  SErrorSingletonExists = '''%s'' unterstützt nur eine Instanz pro Prozess';
+
+  SParamIsNil           = 'Parameter ''%s'' darf nicht Nil sein';
+  SParamIsIllegalObject = 'Ungültiges Objekt für ''%s'': %s';
+  SParamIsIllegalType   = 'Ungültiger Datentyp für ''%s'': %s';
+  SParamIsOutOfRange    = 'Parameter ''%s'' liegt liegt ausserhalb des Gültigkeitsbereiches von ''%s'': %u';
+
+  SErrorUnexpected = 'Unerwarteter Fehler ''%s'' beim Aufruf von ''%s'': %s';
+
+  SErrorInvalidItemsProp     = 'Die Eigenschaft ''%s'' von Klasse ''%s'' ist kein Nachfahre von ''%s''';
+  SErrorInvalidItemIndexProp = 'Die Eigenschaft ''%s'' von Klasse ''%s'' ist nicht vom Typ ''%s''';
+  SErrorItemsNotAssigned     = 'Die Elemente von ''%s'' wurden nicht durch ''%s'' zugewiesen';
 
 implementation
 

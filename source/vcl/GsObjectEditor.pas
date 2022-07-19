@@ -682,6 +682,9 @@ end;
 
 destructor TGSObjectEditorImpl.Destroy;
 begin
+  if (FPropertyList <> nil) then
+    FreeMem(FPropertyList);
+
   FObjectEditorSupport := nil;
 
   inherited;
@@ -796,14 +799,17 @@ begin
 end;
 
 function TGSObjectEditorImpl.GetOEPropertyInfo(Index: Integer): PPropInfo;
+var
+  Count: Integer;
 begin
-  if (FPropertyList = nil) then
-    GetPropList(FOwner, FPropertyList);
+  Result := nil;
 
-  if (Index >= Low(FPropertyList^)) and (Index <= High(FPropertyList^)) then
-    Result := FPropertyList^[Index]
-  else
-    Result := nil;
+  if (FPropertyList = nil) then
+    Count := GetPropList(FOwner, FPropertyList);
+
+  if (Count > 0) then
+    if (Index >= Low(FPropertyList^)) and (Index <= High(FPropertyList^)) then
+      Result := FPropertyList^[Index];
 end;
 
 function TGSObjectEditorImpl.GetOEPropertyName(Index: Integer): TSymbolName;

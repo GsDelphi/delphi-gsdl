@@ -43,6 +43,8 @@ type
 
   { @name }
   TAbstractGSConv = class(TObject)
+  protected
+    class procedure GroupString(var Result: string; Group: Integer);
   public
     { @name replaces the used implementation of @parent.
       @param(AClass is the implementated class to be used) }
@@ -52,18 +54,18 @@ type
       Group: Integer = 0): String; overload; virtual; abstract;
     { @see(@name) }
     class function IntToHex(Value: Int64; Digits: Integer;
-      Group: Boolean = False): String; overload; virtual; abstract;
+      Group: Integer = 0): String; overload; virtual; abstract;
     { @see(@name) }
     class function HexToInt(const H: String): Integer; virtual; abstract;
     { @see(@name) }
     class function StrToHex(const S: String;
-      Group: Boolean = False): String; virtual; abstract;
+      Group: Integer = 0): String; virtual; abstract;
     { @see(@name) }
     class function HexToStr(const H: String): String; virtual; abstract;
 
     { @see(@name) }
     class function BinToHex(const B: String; Digits: Integer;
-      Group: Boolean = False): String; virtual; abstract;
+      Group: Integer = 0): String; virtual; abstract;
     { @see(@name) }
     class function StrToBin(const S: String;
       OrdinalValues: Boolean = False): String; virtual; abstract;
@@ -104,6 +106,23 @@ begin
 end;
 
 { TAbstractGSConv }
+
+class procedure TAbstractGSConv.GroupString(var Result: string; Group: Integer);
+var
+  I: Integer;
+begin
+  { TODO : test }
+  if Group > 0 then
+  begin
+    I := Group + 1;
+
+    while I < Length(Result) do
+    begin
+      Insert(' ', Result, I);
+      Inc(I, Group + 1);
+    end;
+  end;
+end;
 
 class procedure TAbstractGSConv.ReplaceImplementation(AClass: TGSConvClass);
 begin

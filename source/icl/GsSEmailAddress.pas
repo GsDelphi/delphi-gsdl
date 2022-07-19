@@ -15,7 +15,7 @@ uses
 
 type
   TGsSEmailAddressList = class;
-  TGsSNotificationList = class;
+  TGsSEmailNotificationList = class;
 
 
 
@@ -91,7 +91,7 @@ type
     property Items[Index: Integer]: TGsSEmailAddressItem read GetItem; default;
   end;
 
-  TGsSNotificationItem = class(TGsSEmailAddressItem)
+  TGsSEmailNotificationItem = class(TGsSEmailAddressItem)
   private
     FLoggingLevel: TGsSPLoggingLevel;
     function GetLoggingLevel: TGsSyslogMessageSeverity;
@@ -100,7 +100,7 @@ type
     { TAbstractBPSettings }
     procedure CreateProperties; override;
   public
-    constructor CreateNotificationItem(AOwner: TGsSNotificationList;
+    constructor CreateNotificationItem(AOwner: TGsSEmailNotificationList;
       AAddress: string = ''; AFullName: string = '';
       ALoggingLevel: TGsSyslogMessageSeverity = High(TGsSyslogMessageSeverity);
       AImageIndex: TImageIndex = -1); virtual;
@@ -116,9 +116,9 @@ type
       read GetLoggingLevel write SetLoggingLevel;
   end;
 
-  TGsSNotificationList = class(TGsSEmailAddressList)
+  TGsSEmailNotificationList = class(TGsSEmailAddressList)
   private
-    function GetItem(Index: Integer): TGsSNotificationItem;
+    function GetItem(Index: Integer): TGsSEmailNotificationItem;
   public
     constructor CreateNotificationList(AOwner: TCustomBPSettings;
       AName: string; CaptionRes, HintRes: PResStringRec;
@@ -132,7 +132,7 @@ type
       AList: TIdEMailAddressList);
 
     { Properties }
-    property Items[Index: Integer]: TGsSNotificationItem read GetItem; default;
+    property Items[Index: Integer]: TGsSEmailNotificationItem read GetItem; default;
   end;
 
 implementation
@@ -288,16 +288,16 @@ begin
   Result := TGsSEmailAddressItem(inherited Items[Index]);
 end;
 
-{ TGsSNotificationItem }
+{ TGsSEmailNotificationItem }
 
-constructor TGsSNotificationItem.CreateEmailAddress(AOwner: TGsSEmailAddressList;
+constructor TGsSEmailNotificationItem.CreateEmailAddress(AOwner: TGsSEmailAddressList;
   AAddress, AFullName: string; AImageIndex: TImageIndex);
 begin
-  CreateNotificationItem(AOwner as TGsSNotificationList, AAddress, AFullName,
+  CreateNotificationItem(AOwner as TGsSEmailNotificationList, AAddress, AFullName,
     High(TGsSyslogMessageSeverity), AImageIndex);
 end;
 
-constructor TGsSNotificationItem.CreateNotificationItem(AOwner: TGsSNotificationList;
+constructor TGsSEmailNotificationItem.CreateNotificationItem(AOwner: TGsSEmailNotificationList;
   AAddress, AFullName: string; ALoggingLevel: TGsSyslogMessageSeverity;
   AImageIndex: TImageIndex);
 begin
@@ -306,7 +306,7 @@ begin
   FLoggingLevel.Value := ALoggingLevel;
 end;
 
-procedure TGsSNotificationItem.CreateProperties;
+procedure TGsSEmailNotificationItem.CreateProperties;
 resourcestring
   SLoggingLevel = 'Logging-Level';
   SLoggingLevelHint = '';
@@ -317,19 +317,19 @@ begin
     'LoggingLevel', @SLoggingLevel, @SLoggingLevelHint);
 end;
 
-function TGsSNotificationItem.GetLoggingLevel: TGsSyslogMessageSeverity;
+function TGsSEmailNotificationItem.GetLoggingLevel: TGsSyslogMessageSeverity;
 begin
   Result := FLoggingLevel.Value;
 end;
 
-procedure TGsSNotificationItem.SetLoggingLevel(const Value: TGsSyslogMessageSeverity);
+procedure TGsSEmailNotificationItem.SetLoggingLevel(const Value: TGsSyslogMessageSeverity);
 begin
   FLoggingLevel.Value := Value;
 end;
 
-{ TGsSNotificationList }
+{ TGsSEmailNotificationList }
 
-procedure TGsSNotificationList.AssignToEmailList(
+procedure TGsSEmailNotificationList.AssignToEmailList(
   ALoggingLevel: TGsSyslogMessageSeverity;
   AList: TIdEMailAddressList);
 var
@@ -340,21 +340,21 @@ begin
       AList.Add.Assign(Items[I]);
 end;
 
-constructor TGsSNotificationList.CreateEmailAddressList(AOwner: TCustomBPSettings;
+constructor TGsSEmailNotificationList.CreateEmailAddressList(AOwner: TCustomBPSettings;
   AName: string; CaptionRes, HintRes: PResStringRec; AImageIndex: TImageIndex);
 begin
   CreateNotificationList(AOwner, AName, CaptionRes, HintRes, AImageIndex);
 end;
 
-constructor TGsSNotificationList.CreateNotificationList(AOwner: TCustomBPSettings;
+constructor TGsSEmailNotificationList.CreateNotificationList(AOwner: TCustomBPSettings;
   AName: string; CaptionRes, HintRes: PResStringRec; AImageIndex: TImageIndex);
 begin
-  CreateList(AOwner, AName, CaptionRes, HintRes, TGsSNotificationItem, AImageIndex);
+  CreateList(AOwner, AName, CaptionRes, HintRes, TGsSEmailNotificationItem, AImageIndex);
 end;
 
-function TGsSNotificationList.GetItem(Index: Integer): TGsSNotificationItem;
+function TGsSEmailNotificationList.GetItem(Index: Integer): TGsSEmailNotificationItem;
 begin
-  Result := TGsSNotificationItem(inherited Items[Index]);
+  Result := TGsSEmailNotificationItem(inherited Items[Index]);
 end;
 
 end.

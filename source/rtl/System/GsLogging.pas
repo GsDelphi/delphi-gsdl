@@ -28,8 +28,7 @@
 }
 unit GsLogging;
 
-
-{$I gsdl.inc}
+{$I gsdl.inc}
 
 interface
 

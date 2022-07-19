@@ -26,7 +26,7 @@
 
   @name contains system constants and resourcestrings.
 }
-unit GsStreams;
+unit GsStreams;
 
 {$I gsdl.inc}
 
@@ -116,7 +116,7 @@ type
   }
 
 const
-  GS_SECURE_STREAM_HEADER = 'GSSecureStream'#0;
+  GS_SECURE_STREAM_HEADER: AnsiString = 'GSSecureStream'#0;
 
 implementation
 
@@ -344,7 +344,8 @@ begin
     { write header and data }
     DataSize := TmpStream2.Size;
 
-    Stream.WriteBuffer(GS_SECURE_STREAM_HEADER, Length(GS_SECURE_STREAM_HEADER));
+    WriteStreamHeader(Stream, GS_SECURE_STREAM_HEADER);
+    //Stream.WriteBuffer(GS_SECURE_STREAM_HEADER[1], Length(GS_SECURE_STREAM_HEADER));
     Stream.WriteBuffer(FUseCompression, SizeOf(FUseCompression));
     Stream.WriteBuffer(FUseEncryption, SizeOf(FUseEncryption));
     Stream.WriteBuffer(DataSize, SizeOf(DataSize));

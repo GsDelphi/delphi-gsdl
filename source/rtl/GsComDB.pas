@@ -41,6 +41,9 @@ uses
   SyncObjs,
   SysUtils;
 
+const
+  REGSTR_PATH_DEVICEMAP_SERIALCOMM = 'HARDWARE\DEVICEMAP\SERIALCOMM';
+
 type
   { exceptions }
   EGSComDBError = class(Exception);
@@ -52,9 +55,9 @@ type
 
   TGSComPortProperties = record
     case IsFTDI: Boolean of
-      True: (VendorID: String[20];
-        ProductID: String[20];
-        Serial: String[20]);
+      True: (VendorID: string[20];
+        ProductID: string[20];
+        Serial: string[20]);
       False: ();
   end;
 
@@ -75,8 +78,7 @@ type
 
     property PortAvailable[APort: TGSComPort]: Boolean read GetPortAvailable;
     property PortAccessible[APort: TGSComPort]: Boolean read GetPortAccessible;
-    property PortProperties[APort: TGSComPort]: TGSComPortProperties
-      read GetPortProperties;
+    property PortProperties[APort: TGSComPort]: TGSComPortProperties read GetPortProperties;
 
     property UpdatingPorts: Boolean read GetUpdatingPorts;
     property UpdateTerminatedEvent: TSimpleEvent read GetUpdateTerminatedEvent;
@@ -115,9 +117,9 @@ type
 
   TGlobalGSComDatabase = class(TAbstractGSComDatabase)
   private
-    FAvailablePorts: TGSComPortStatus;
-    FPropertiesList: TGSComPortPropertiesList;
-    FUpdateThread: TGSComDatabaseUpdateThread;
+    FAvailablePorts:        TGSComPortStatus;
+    FPropertiesList:        TGSComPortPropertiesList;
+    FUpdateThread:          TGSComDatabaseUpdateThread;
     FUpdateTerminatedEvent: TSimpleEvent;
   protected
     function GetPortAccessible(APort: TGSComPort): Boolean; override;
@@ -137,13 +139,13 @@ type
   private
     FOwner: TGlobalGSComDatabase;
     procedure DoUpdate;
-    procedure RaiseLastOSError(CalledFunction: String);
+    procedure RaiseLastOSError(CalledFunction: string; LastError: Integer = 0);
   protected
     procedure ExecuteNew; override;
   public
     constructor Create(AOwner: TGlobalGSComDatabase);
 
-    class function Name: String; override;
+    class function Name: string; override;
   end;
 
 var
@@ -157,7 +159,7 @@ begin
 
   inherited;
 
-  FUpdateThread := TGSComDatabaseUpdateThread.Create(Self);
+  FUpdateThread          := TGSComDatabaseUpdateThread.Create(Self);
   FUpdateTerminatedEvent := TSimpleEvent.Create;
   GSDeviceChangeHandlerAddNotify(DeviceChangeEvent);
 
@@ -183,8 +185,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'Destroy');{$ENDIF}
 end;
 
-procedure TGlobalGSComDatabase.DeviceChangeEvent(ASender: TObject;
-  var AMessage: TMessage);
+procedure TGlobalGSComDatabase.DeviceChangeEvent(ASender: TObject; var AMessage: TMessage);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'DeviceChangeEvent');{$ENDIF}
 
@@ -232,7 +233,7 @@ end;
 function TGlobalGSComDatabase.GetPortAccessible(APort: TGSComPort): Boolean;
 var
   PortHandle: THandle;
-  Error: DWORD;
+  Error:      DWORD;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'GetPortAccessible');{$ENDIF}
 
@@ -250,8 +251,8 @@ begin
       PortHandle := CreateFile(PWideChar(Format('\\.\COM%d', [APort])),
         (GENERIC_READ or GENERIC_WRITE), 0, nil, OPEN_EXISTING, 0, 0);
       {$ELSE ~SUPPORTS_UNICODE}
-      PortHandle := CreateFile(PAnsiChar(Format('\\.\COM%d', [APort])),
-        (GENERIC_READ or GENERIC_WRITE), 0, nil, OPEN_EXISTING, 0, 0);
+      PortHandle := CreateFile(PAnsiChar(Format('\\.\COM%d', [APort])), (GENERIC_READ or GENERIC_WRITE),
+        0, nil, OPEN_EXISTING, 0, 0);
       {$ENDIF ~SUPPORTS_UNICODE}
 
       try
@@ -263,7 +264,7 @@ begin
         if (Error in [ERROR_SUCCESS, ERROR_ACCESS_DENIED]) then
         begin
           FAvailablePorts[APort] := True;
-          Result := (Error = ERROR_SUCCESS);
+          Result                 := (Error = ERROR_SUCCESS);
         end
         else
         begin
@@ -332,7 +333,7 @@ begin
   inherited Create(True);
 
   Priority := tpLowest;
-  FOwner := AOwner;
+  FOwner   := AOwner;
 
   Resume;
 
@@ -341,17 +342,17 @@ end;
 
 procedure TGSComDatabaseUpdateThread.DoUpdate;
 var
-  ComDB: HCOMDB;
-  Buf: PByte;
-  BufSize: DWORD;
-  DBError: LONG;
-  Dummy: DWORD;
-  P: TGSComPort;
-  DevCount, lDev, i: Integer;
-  DevList: TStrings;
-  PName, DevStr: String;
-  Reg: TRegistry;
-  cPort: TGSComPort;
+  ComDB:             HCOMDB;
+  Buf:               PByte;
+  BufSize:           DWORD;
+  DBError:           LONG;
+  Dummy:             DWORD;
+  P:                 TGSComPort;
+  DevCount, lDev, I: Integer;
+  DevList:           TStrings;
+  PName, DevStr:     string;
+  Reg:               TRegistry;
+  cPort:             TGSComPort;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'DoUpdate');{$ENDIF}
 
@@ -376,8 +377,7 @@ begin
     GetMem(Buf, BufSize);
 
     try
-      DBError := ComDBGetCurrentPortUsage(ComDB, Buf^, BufSize,
-        CDB_REPORT_BYTES, Dummy);
+      DBError := ComDBGetCurrentPortUsage(ComDB, Buf^, BufSize, CDB_REPORT_BYTES, Dummy);
 
       if (DBError <> LONG(ERROR_SUCCESS)) then
       begin
@@ -389,7 +389,7 @@ begin
 
       for P := Low(P) to High(P) do
       begin
-        FOwner.FAvailablePorts[P] := False;
+        FOwner.FAvailablePorts[P]        := False;
         FOwner.FPropertiesList[P].IsFTDI := False;
 
         if (P <= BufSize) then
@@ -400,77 +400,116 @@ begin
     finally
       FreeMem(Buf);
 
-      if (ComDBClose(ComDB) <> LONG(ERROR_SUCCESS)) then
-        RaiseLastOSError('ComDBClose');
+      DBError := ComDBClose(ComDB);
+
+      if (DBError <> LONG(ERROR_SUCCESS)) then
+        RaiseLastOSError('ComDBClose', DBError);
     end;
   end
   else
-    RaiseLastOSError('ComDBOpen');
+  begin
+    if (DBError <> LONG(ERROR_ACCESS_DENIED)) then
+      RaiseLastOSError('ComDBOpen', DBError);
+  end;
 
-  { search ftdi chips }
   Reg := TRegistry.Create(KEY_READ);
 
   try
     Reg.RootKey := HKEY_LOCAL_MACHINE;
 
-    if Reg.OpenKeyReadOnly(REGSTR_PATH_SERVICES + '\FTSER2K\' + REGSTR_PATH_ENUM) then
+    { Search for mappings }
+    if Reg.OpenKeyReadOnly(REGSTR_PATH_DEVICEMAP_SERIALCOMM) then
     begin
-      if Reg.ValueExists('Count') then
-      begin
+      try
         DevList := TStringList.Create;
 
         try
-          DevCount := Reg.ReadInteger('Count');
+          Reg.GetValueNames(DevList);
 
-          for i := 0 to DevCount - 1 do
+          for I := 0 to DevList.Count - 1 do
           begin
-            if Reg.ValueExists(IntToStr(i)) then
-              DevList.Add(Reg.ReadString(IntToStr(i)));
-          end;
+            PName := Reg.ReadString(DevList.Strings[I]);
 
-          for i := 0 to DevList.Count - 1 do
-          begin
-            Reg.CloseKey;
-
-            if Reg.OpenKeyReadOnly(REGSTR_PATH_SYSTEMENUM + '\' +
-              DevList.Strings[i] + '\' + REGSTR_KEY_DEVICEPARAMETERS) then
+            if SameText(Copy(PName, 1, 3), 'COM') then
             begin
-              if Reg.ValueExists(REGSTR_VAL_PORTNAME) then
-              begin
-                PName := Reg.ReadString(REGSTR_VAL_PORTNAME);
+              PName := Copy(PName, 4, MaxInt);
+              lDev  := SysUtils.StrToIntDef(PName, 0);
 
-                {$IFDEF USE_CODESITE}
-                BPC_CodeSite.Send('Check port for FTDI', PName);
-                {$ENDIF}
-
-                if (Copy(PName, 1, 3) = 'COM') then
-                begin
-                  try
-                    PName := Copy(PName, 4, Length(PName));
-                    cPort := SysUtils.StrToInt(PName);
-
-                    DevStr := GetStrEx(2, DevList.Strings[i], '\');
-                    lDev := Length(DevStr);
-
-                    FOwner.FPropertiesList[cPort].IsFTDI := True;
-                    FOwner.FPropertiesList[cPort].VendorID :=
-                      ShortString(Copy(GetStrEx(1, DevStr, '+'), 5, lDev));
-                    FOwner.FPropertiesList[cPort].ProductID :=
-                      ShortString(Copy(GetStrEx(2, DevStr, '+'), 5, lDev));
-                    FOwner.FPropertiesList[cPort].Serial :=
-                      ShortString(Copy(GetStrEx(3, DevStr, '+'), 1, 8));
-
-                    {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port is FTDI',
-                      FOwner.FPropertiesList[cPort].IsFTDI);{$ENDIF}
-                  except
-                  end;
-                end;
-              end;
+              if (lDev >= Low(P)) and (lDev <= High(P)) then
+                FOwner.FAvailablePorts[lDev] := True;
             end;
           end;
         finally
           DevList.Free;
         end;
+      finally
+        Reg.CloseKey;
+      end;
+    end;
+
+    { search for ftdi chips }
+    if Reg.OpenKeyReadOnly(REGSTR_PATH_SERVICES + '\FTSER2K\' + REGSTR_PATH_ENUM) then
+    begin
+      try
+        if Reg.ValueExists('Count') then
+        begin
+          DevList := TStringList.Create;
+
+          try
+            DevCount := Reg.ReadInteger('Count');
+
+            for I := 0 to DevCount - 1 do
+            begin
+              if Reg.ValueExists(IntToStr(I)) then
+                DevList.Add(Reg.ReadString(IntToStr(I)));
+            end;
+
+            for I := 0 to DevList.Count - 1 do
+            begin
+              Reg.CloseKey;
+
+              if Reg.OpenKeyReadOnly(REGSTR_PATH_SYSTEMENUM + '\' + DevList.Strings[I] +
+                '\' + REGSTR_KEY_DEVICEPARAMETERS) then
+              begin
+                if Reg.ValueExists(REGSTR_VAL_PORTNAME) then
+                begin
+                  PName := Reg.ReadString(REGSTR_VAL_PORTNAME);
+
+                {$IFDEF USE_CODESITE}
+                  BPC_CodeSite.Send('Check port for FTDI', PName);
+                {$ENDIF}
+
+                  if (Copy(PName, 1, 3) = 'COM') then
+                  begin
+                    try
+                      PName := Copy(PName, 4, Length(PName));
+                      cPort := SysUtils.StrToInt(PName);
+
+                      DevStr := GetStrEx(2, DevList.Strings[I], '\');
+                      lDev   := Length(DevStr);
+
+                      FOwner.FPropertiesList[cPort].IsFTDI := True;
+                      FOwner.FPropertiesList[cPort].VendorID :=
+                        ShortString(Copy(GetStrEx(1, DevStr, '+'), 5, lDev));
+                      FOwner.FPropertiesList[cPort].ProductID :=
+                        ShortString(Copy(GetStrEx(2, DevStr, '+'), 5, lDev));
+                      FOwner.FPropertiesList[cPort].Serial :=
+                        ShortString(Copy(GetStrEx(3, DevStr, '+'), 1, 8));
+
+                    {$IFDEF USE_CODESITE}BPC_CodeSite.Send('Port is FTDI',
+                        FOwner.FPropertiesList[cPort].IsFTDI);{$ENDIF}
+                    except
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          finally
+            DevList.Free;
+          end;
+        end;
+      finally
+        Reg.CloseKey;
       end;
     end;
   finally
@@ -579,7 +618,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'ExecuteNew');{$ENDIF}
 end;
 
-class function TGSComDatabaseUpdateThread.Name: String;
+class function TGSComDatabaseUpdateThread.Name: string;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('TGSComDatabaseUpdateThread.Name');
 {$ENDIF}
@@ -590,7 +629,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TGSComDatabaseUpdateThread.RaiseLastOSError(CalledFunction: String);
+procedure TGSComDatabaseUpdateThread.RaiseLastOSError(CalledFunction: string; LastError: Integer);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'LogLastWinError');{$ENDIF}
 
@@ -599,7 +638,10 @@ begin
     {$IFDEF USE_CODESITE}BPC_CodeSite.SendWinError(CalledFunction, GetLastError);{$ENDIF}
     {$IFDEF USE_CODESITE}BPC_CodeSite.AddSeparator;{$ENDIF}
 
-    SysUtils.RaiseLastOSError;
+    if LastError <> 0 then
+      SysUtils.RaiseLastOSError(LastError, CalledFunction)
+    else
+      SysUtils.RaiseLastOSError(GetLastError, CalledFunction);
   finally
     SetLastError(ERROR_SUCCESS);
   end;

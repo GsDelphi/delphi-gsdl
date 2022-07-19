@@ -19,6 +19,9 @@
 }
 unit GsWindows;
 
+{$I gsdl.inc}
+{$I windowsonly.inc}
+
 interface
 
 uses

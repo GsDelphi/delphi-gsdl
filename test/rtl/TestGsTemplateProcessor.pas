@@ -318,6 +318,7 @@ procedure TestTGsTemplateProcessor.TestProcessFormat;
     DoTest(IntToHex(TTestProperties(FProperties).TestUInt16, 8), '%TestUInt16(8)%');
     DoTest(IntToHex(TTestProperties(FProperties).TestUInt32, 8), '%TestUInt32(8)%');
     DoTest(IntToHex(TTestProperties(FProperties).TestUInt64, 8), '%TestUInt64(8)%');
+    DoTest(FormatCurr('###,##0.00', TTestProperties(FProperties).TestCurrency), '%TestCurrency(###,##0.00)%');
   end;
 
 begin
@@ -331,6 +332,7 @@ begin
     TestUInt16 := Random(Trunc(IntPower(2, SizeOf(TestUInt16)) - 1));
     TestUInt32 := Random(Trunc(IntPower(2, SizeOf(TestUInt32)) - 1));
     TestUInt64 := Random(Trunc(IntPower(2, SizeOf(TestUInt64)) - 1));
+    TestCurrency := 1234.5678;
   end;
 
   IntTest;

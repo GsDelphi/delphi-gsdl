@@ -22,7 +22,7 @@ type
   {$IFDEF UNICODE}
   RawUTF8 = type AnsiString(CP_UTF8); // Codepage for an UTF8 string
   {$ELSE ~UNICODE}
-  RawUTF8 = type Ansistring;
+  RawUTF8 = type AnsiString;
   {$ENDIF ~UNICODE}
   {$ENDIF ~!mORMot}
 
@@ -72,16 +72,16 @@ type
       Identifier: TGsLanguageIdentifier;
       Iso:        TGsLanguageIsoAlpha2;
     end;
+    function GetEnglish: RawUTF8;
     function GetIdentifier: TGsLanguageIdentifier;
     function GetIsoAlpha2: TGsLanguageIsoAlpha2;
     function GetIsoAlpha3T: TGsLanguageIsoAlpha3T;
     function GetIsoAlpha3B: TGsLanguageIsoAlpha3B;
+    function GetLangID: LANGID;
     procedure SetIdentifier(const Value: TGsLanguageIdentifier);
     procedure SetIsoAlpha2(const Value: TGsLanguageIsoAlpha2);
     procedure SetIsoAlpha3T(const Value: TGsLanguageIsoAlpha3T);
     procedure SetIsoAlpha3B(const Value: TGsLanguageIsoAlpha3B);
-    function GetEnglish: RawUTF8;
-    function GetLangID: LANGID;
   public
     /// built-in simple unit tests
     //class procedure RegressionTests(test: TSynTestCase);
@@ -504,76 +504,62 @@ resourcestring
 
 const
   LANGUAGE_NAME_EN: array[TGsLanguageIdentifier] of PResStringRec =
-    (@SUndefined, @SEnglishAB, @SEnglishAA, @SEnglishAF, @SEnglishAK,
-    @SEnglishSQ, @SEnglishAM, @SEnglishAR, @SEnglishAN, @SEnglishHY,
-    @SEnglishAS, @SEnglishAV, @SEnglishAE, @SEnglishAY, @SEnglishAZ,
-    @SEnglishBM, @SEnglishBA, @SEnglishEU, @SEnglishBE, @SEnglishBN,
-    @SEnglishBH, @SEnglishBI, @SEnglishBS, @SEnglishBR, @SEnglishBG,
-    @SEnglishMY, @SEnglishCA, @SEnglishKM, @SEnglishCH, @SEnglishCE,
-    @SEnglishNY, @SEnglishZH, @SEnglishCU, @SEnglishCV, @SEnglishKW,
-    @SEnglishCO, @SEnglishCR, @SEnglishHR, @SEnglishCS, @SEnglishDA,
-    @SEnglishDV, @SEnglishNL, @SEnglishDZ, @SEnglishEN, @SEnglishEO,
-    @SEnglishET, @SEnglishEE, @SEnglishFO, @SEnglishFJ, @SEnglishFI,
-    @SEnglishFR, @SEnglishFF, @SEnglishGD, @SEnglishGL, @SEnglishLG,
-    @SEnglishKA, @SEnglishDE, @SEnglishEL, @SEnglishGN, @SEnglishGU,
-    @SEnglishHT, @SEnglishHA, @SEnglishHE, @SEnglishHZ, @SEnglishHI,
-    @SEnglishHO, @SEnglishHU, @SEnglishIS, @SEnglishIO, @SEnglishIG,
-    @SEnglishID, @SEnglishIA, @SEnglishIE, @SEnglishIU, @SEnglishIK,
-    @SEnglishGA, @SEnglishIT, @SEnglishJA, @SEnglishJV, @SEnglishKL,
-    @SEnglishKN, @SEnglishKR, @SEnglishKS, @SEnglishKK, @SEnglishKI,
-    @SEnglishRW, @SEnglishKY, @SEnglishKV, @SEnglishKG, @SEnglishKO,
-    @SEnglishKJ, @SEnglishKU, @SEnglishLO, @SEnglishLA, @SEnglishLV,
-    @SEnglishLI, @SEnglishLN, @SEnglishLT, @SEnglishLU, @SEnglishLB,
-    @SEnglishMK, @SEnglishMG, @SEnglishMS, @SEnglishML, @SEnglishMT,
-    @SEnglishGV, @SEnglishMI, @SEnglishMR, @SEnglishMH, @SEnglishMN,
-    @SEnglishNA, @SEnglishNV, @SEnglishNG, @SEnglishNE, @SEnglishND,
-    @SEnglishSE, @SEnglishNO, @SEnglishNB, @SEnglishNN, @SEnglishOC,
-    @SEnglishOJ, @SEnglishOR, @SEnglishOM, @SEnglishOS, @SEnglishPI,
-    @SEnglishPA, @SEnglishPS, @SEnglishFA, @SEnglishPL, @SEnglishPT,
-    @SEnglishQU, @SEnglishRO, @SEnglishRM, @SEnglishRN, @SEnglishRU,
-    @SEnglishSM, @SEnglishSG, @SEnglishSA, @SEnglishSC, @SEnglishSR,
-    @SEnglishSN, @SEnglishII, @SEnglishSD, @SEnglishSI, @SEnglishSK,
-    @SEnglishSL, @SEnglishSO, @SEnglishNR, @SEnglishST, @SEnglishES,
-    @SEnglishSU, @SEnglishSW, @SEnglishSS, @SEnglishSV, @SEnglishTL,
-    @SEnglishTY, @SEnglishTG, @SEnglishTA, @SEnglishTT, @SEnglishTE,
-    @SEnglishTH, @SEnglishBO, @SEnglishTI, @SEnglishTO, @SEnglishTS,
-    @SEnglishTN, @SEnglishTR, @SEnglishTK, @SEnglishTW, @SEnglishUG,
-    @SEnglishUK, @SEnglishUR, @SEnglishUZ, @SEnglishVE, @SEnglishVI,
-    @SEnglishVO, @SEnglishWA, @SEnglishCY, @SEnglishFY, @SEnglishWO,
-    @SEnglishXH, @SEnglishYI, @SEnglishYO, @SEnglishZA, @SEnglishZU);
+    (@SUndefined, @SEnglishAB, @SEnglishAA, @SEnglishAF, @SEnglishAK, @SEnglishSQ, @SEnglishAM,
+    @SEnglishAR, @SEnglishAN, @SEnglishHY, @SEnglishAS, @SEnglishAV, @SEnglishAE, @SEnglishAY,
+    @SEnglishAZ, @SEnglishBM, @SEnglishBA, @SEnglishEU, @SEnglishBE, @SEnglishBN, @SEnglishBH,
+    @SEnglishBI, @SEnglishBS, @SEnglishBR, @SEnglishBG, @SEnglishMY, @SEnglishCA, @SEnglishKM,
+    @SEnglishCH, @SEnglishCE, @SEnglishNY, @SEnglishZH, @SEnglishCU, @SEnglishCV, @SEnglishKW,
+    @SEnglishCO, @SEnglishCR, @SEnglishHR, @SEnglishCS, @SEnglishDA, @SEnglishDV, @SEnglishNL,
+    @SEnglishDZ, @SEnglishEN, @SEnglishEO, @SEnglishET, @SEnglishEE, @SEnglishFO, @SEnglishFJ,
+    @SEnglishFI, @SEnglishFR, @SEnglishFF, @SEnglishGD, @SEnglishGL, @SEnglishLG, @SEnglishKA,
+    @SEnglishDE, @SEnglishEL, @SEnglishGN, @SEnglishGU, @SEnglishHT, @SEnglishHA, @SEnglishHE,
+    @SEnglishHZ, @SEnglishHI, @SEnglishHO, @SEnglishHU, @SEnglishIS, @SEnglishIO, @SEnglishIG,
+    @SEnglishID, @SEnglishIA, @SEnglishIE, @SEnglishIU, @SEnglishIK, @SEnglishGA, @SEnglishIT,
+    @SEnglishJA, @SEnglishJV, @SEnglishKL, @SEnglishKN, @SEnglishKR, @SEnglishKS, @SEnglishKK,
+    @SEnglishKI, @SEnglishRW, @SEnglishKY, @SEnglishKV, @SEnglishKG, @SEnglishKO, @SEnglishKJ,
+    @SEnglishKU, @SEnglishLO, @SEnglishLA, @SEnglishLV, @SEnglishLI, @SEnglishLN, @SEnglishLT,
+    @SEnglishLU, @SEnglishLB, @SEnglishMK, @SEnglishMG, @SEnglishMS, @SEnglishML, @SEnglishMT,
+    @SEnglishGV, @SEnglishMI, @SEnglishMR, @SEnglishMH, @SEnglishMN, @SEnglishNA, @SEnglishNV,
+    @SEnglishNG, @SEnglishNE, @SEnglishND, @SEnglishSE, @SEnglishNO, @SEnglishNB, @SEnglishNN,
+    @SEnglishOC, @SEnglishOJ, @SEnglishOR, @SEnglishOM, @SEnglishOS, @SEnglishPI, @SEnglishPA,
+    @SEnglishPS, @SEnglishFA, @SEnglishPL, @SEnglishPT, @SEnglishQU, @SEnglishRO, @SEnglishRM,
+    @SEnglishRN, @SEnglishRU, @SEnglishSM, @SEnglishSG, @SEnglishSA, @SEnglishSC, @SEnglishSR,
+    @SEnglishSN, @SEnglishII, @SEnglishSD, @SEnglishSI, @SEnglishSK, @SEnglishSL, @SEnglishSO,
+    @SEnglishNR, @SEnglishST, @SEnglishES, @SEnglishSU, @SEnglishSW, @SEnglishSS, @SEnglishSV,
+    @SEnglishTL, @SEnglishTY, @SEnglishTG, @SEnglishTA, @SEnglishTT, @SEnglishTE, @SEnglishTH,
+    @SEnglishBO, @SEnglishTI, @SEnglishTO, @SEnglishTS, @SEnglishTN, @SEnglishTR, @SEnglishTK,
+    @SEnglishTW, @SEnglishUG, @SEnglishUK, @SEnglishUR, @SEnglishUZ, @SEnglishVE, @SEnglishVI,
+    @SEnglishVO, @SEnglishWA, @SEnglishCY, @SEnglishFY, @SEnglishWO, @SEnglishXH, @SEnglishYI,
+    @SEnglishYO, @SEnglishZA, @SEnglishZU);
 
   LANGUAGE_NAME_NATIVE: array[TGsLanguageIdentifier] of PResStringRec =
-    (@SUndefined, @SNativeAB, @SNativeAA, @SNativeAF, @SNativeAK,
-    @SNativeSQ, @SNativeAM, @SNativeAR, @SNativeAN, @SNativeHY, @SNativeAS,
-    @SNativeAV, @SNativeAE, @SNativeAY, @SNativeAZ, @SNativeBM, @SNativeBA,
-    @SNativeEU, @SNativeBE, @SNativeBN, @SNativeBH, @SNativeBI, @SNativeBS,
-    @SNativeBR, @SNativeBG, @SNativeMY, @SNativeCA, @SNativeKM, @SNativeCH,
-    @SNativeCE, @SNativeNY, @SNativeZH, @SNativeCU, @SNativeCV, @SNativeKW,
-    @SNativeCO, @SNativeCR, @SNativeHR, @SNativeCS, @SNativeDA, @SNativeDV,
-    @SNativeNL, @SNativeDZ, @SNativeEN, @SNativeEO, @SNativeET, @SNativeEE,
-    @SNativeFO, @SNativeFJ, @SNativeFI, @SNativeFR, @SNativeFF, @SNativeGD,
-    @SNativeGL, @SNativeLG, @SNativeKA, @SNativeDE, @SNativeEL, @SNativeGN,
-    @SNativeGU, @SNativeHT, @SNativeHA, @SNativeHE, @SNativeHZ, @SNativeHI,
-    @SNativeHO, @SNativeHU, @SNativeIS, @SNativeIO, @SNativeIG, @SNativeID,
-    @SNativeIA, @SNativeIE, @SNativeIU, @SNativeIK, @SNativeGA, @SNativeIT,
-    @SNativeJA, @SNativeJV, @SNativeKL, @SNativeKN, @SNativeKR, @SNativeKS,
-    @SNativeKK, @SNativeKI, @SNativeRW, @SNativeKY, @SNativeKV, @SNativeKG,
-    @SNativeKO, @SNativeKJ, @SNativeKU, @SNativeLO, @SNativeLA, @SNativeLV,
-    @SNativeLI, @SNativeLN, @SNativeLT, @SNativeLU, @SNativeLB, @SNativeMK,
-    @SNativeMG, @SNativeMS, @SNativeML, @SNativeMT, @SNativeGV, @SNativeMI,
-    @SNativeMR, @SNativeMH, @SNativeMN, @SNativeNA, @SNativeNV, @SNativeNG,
-    @SNativeNE, @SNativeND, @SNativeSE, @SNativeNO, @SNativeNB, @SNativeNN,
-    @SNativeOC, @SNativeOJ, @SNativeOR, @SNativeOM, @SNativeOS, @SNativePI,
-    @SNativePA, @SNativePS, @SNativeFA, @SNativePL, @SNativePT, @SNativeQU,
-    @SNativeRO, @SNativeRM, @SNativeRN, @SNativeRU, @SNativeSM, @SNativeSG,
-    @SNativeSA, @SNativeSC, @SNativeSR, @SNativeSN, @SNativeII, @SNativeSD,
-    @SNativeSI, @SNativeSK, @SNativeSL, @SNativeSO, @SNativeNR, @SNativeST,
-    @SNativeES, @SNativeSU, @SNativeSW, @SNativeSS, @SNativeSV, @SNativeTL,
-    @SNativeTY, @SNativeTG, @SNativeTA, @SNativeTT, @SNativeTE, @SNativeTH,
-    @SNativeBO, @SNativeTI, @SNativeTO, @SNativeTS, @SNativeTN, @SNativeTR,
-    @SNativeTK, @SNativeTW, @SNativeUG, @SNativeUK, @SNativeUR, @SNativeUZ,
-    @SNativeVE, @SNativeVI, @SNativeVO, @SNativeWA, @SNativeCY, @SNativeFY,
-    @SNativeWO, @SNativeXH, @SNativeYI, @SNativeYO, @SNativeZA, @SNativeZU);
+    (@SUndefined, @SNativeAB, @SNativeAA, @SNativeAF, @SNativeAK, @SNativeSQ, @SNativeAM,
+    @SNativeAR, @SNativeAN, @SNativeHY, @SNativeAS, @SNativeAV, @SNativeAE, @SNativeAY,
+    @SNativeAZ, @SNativeBM, @SNativeBA, @SNativeEU, @SNativeBE, @SNativeBN, @SNativeBH,
+    @SNativeBI, @SNativeBS, @SNativeBR, @SNativeBG, @SNativeMY, @SNativeCA, @SNativeKM,
+    @SNativeCH, @SNativeCE, @SNativeNY, @SNativeZH, @SNativeCU, @SNativeCV, @SNativeKW,
+    @SNativeCO, @SNativeCR, @SNativeHR, @SNativeCS, @SNativeDA, @SNativeDV, @SNativeNL,
+    @SNativeDZ, @SNativeEN, @SNativeEO, @SNativeET, @SNativeEE, @SNativeFO, @SNativeFJ,
+    @SNativeFI, @SNativeFR, @SNativeFF, @SNativeGD, @SNativeGL, @SNativeLG, @SNativeKA,
+    @SNativeDE, @SNativeEL, @SNativeGN, @SNativeGU, @SNativeHT, @SNativeHA, @SNativeHE,
+    @SNativeHZ, @SNativeHI, @SNativeHO, @SNativeHU, @SNativeIS, @SNativeIO, @SNativeIG,
+    @SNativeID, @SNativeIA, @SNativeIE, @SNativeIU, @SNativeIK, @SNativeGA, @SNativeIT,
+    @SNativeJA, @SNativeJV, @SNativeKL, @SNativeKN, @SNativeKR, @SNativeKS, @SNativeKK,
+    @SNativeKI, @SNativeRW, @SNativeKY, @SNativeKV, @SNativeKG, @SNativeKO, @SNativeKJ,
+    @SNativeKU, @SNativeLO, @SNativeLA, @SNativeLV, @SNativeLI, @SNativeLN, @SNativeLT,
+    @SNativeLU, @SNativeLB, @SNativeMK, @SNativeMG, @SNativeMS, @SNativeML, @SNativeMT,
+    @SNativeGV, @SNativeMI, @SNativeMR, @SNativeMH, @SNativeMN, @SNativeNA, @SNativeNV,
+    @SNativeNG, @SNativeNE, @SNativeND, @SNativeSE, @SNativeNO, @SNativeNB, @SNativeNN,
+    @SNativeOC, @SNativeOJ, @SNativeOR, @SNativeOM, @SNativeOS, @SNativePI, @SNativePA,
+    @SNativePS, @SNativeFA, @SNativePL, @SNativePT, @SNativeQU, @SNativeRO, @SNativeRM,
+    @SNativeRN, @SNativeRU, @SNativeSM, @SNativeSG, @SNativeSA, @SNativeSC, @SNativeSR,
+    @SNativeSN, @SNativeII, @SNativeSD, @SNativeSI, @SNativeSK, @SNativeSL, @SNativeSO,
+    @SNativeNR, @SNativeST, @SNativeES, @SNativeSU, @SNativeSW, @SNativeSS, @SNativeSV,
+    @SNativeTL, @SNativeTY, @SNativeTG, @SNativeTA, @SNativeTT, @SNativeTE, @SNativeTH,
+    @SNativeBO, @SNativeTI, @SNativeTO, @SNativeTS, @SNativeTN, @SNativeTR, @SNativeTK,
+    @SNativeTW, @SNativeUG, @SNativeUK, @SNativeUR, @SNativeUZ, @SNativeVE, @SNativeVI,
+    @SNativeVO, @SNativeWA, @SNativeCY, @SNativeFY, @SNativeWO, @SNativeXH, @SNativeYI,
+    @SNativeYO, @SNativeZA, @SNativeZU);
 
   LANGUAGE_ISO3T: array[TGsLanguageIdentifier] of array[0..3] of AnsiChar = ('',
     'abk', 'aar', 'afr', 'aka', 'sqi', 'amh', 'ara', 'arg', 'hye', 'asm',
@@ -623,9 +609,9 @@ type
 var
   LANGUAGE_ISO2: array[TGsLanguageIdentifier] of Word;
 
-  Locales: TStringList = nil;
+  Locales:        TStringList = nil;
   PrimaryLocales: TStringList = nil;
-  SubLocales: TStringList = nil;
+  SubLocales:     TStringList = nil;
 
 procedure Initialize;
 var
@@ -634,8 +620,8 @@ var
 begin
   for L := lcFirst to lcLast do
   begin
-    S := Pointer(GetEnumName(TypeInfo(TGsLanguageIdentifier), Ord(L)));
-    LANGUAGE_ISO2[L] := PWord(S + 3)^;
+    S                := Pointer(AnsiString(GetEnumName(TypeInfo(TGsLanguageIdentifier), Ord(L))));
+    LANGUAGE_ISO2[L] := PWord(S + 2)^;
   end;
 end;
 
@@ -674,7 +660,7 @@ var
 
 function EnumLocalesProc(lpLocaleString: LPTSTR): BOOL; stdcall;
 var
-  Locale: Windows.LCID;
+  Locale:     Windows.LCID;
   LocaleInfo: string;
 begin
   Result := True;
@@ -700,8 +686,8 @@ end;
 procedure InternalGetLocaleList(AList: TStrings; AOption: TLocaleListOption);
 var
   PrimaryLanguage: LANGID;
-  I, J:  Integer;
-  Found: Boolean;
+  I, J:            Integer;
+  Found:           Boolean;
 begin
   AList.Clear;
   EnumLocaleList := TStringList.Create;
@@ -716,17 +702,15 @@ begin
       begin
         while (i < EnumLocaleList.Count - 1) do
         begin
-          PrimaryLanguage := GetPrimaryLanguageID(
-            Windows.LCID(EnumLocaleList.Objects[I]));
+          PrimaryLanguage := GetPrimaryLanguageID(Windows.LCID(EnumLocaleList.Objects[I]));
           if (EnumLocaleList.IndexOfObject(Pointer(PrimaryLanguage)) < 0) then
           begin
-            J := I + 1;
+            J     := I + 1;
             Found := False;
 
             while (J < EnumLocaleList.Count) do
             begin
-              if (PrimaryLanguage = GetPrimaryLanguageID(
-                Windows.LCID(EnumLocaleList.Objects[J]))) then
+              if (PrimaryLanguage = GetPrimaryLanguageID(Windows.LCID(EnumLocaleList.Objects[J]))) then
               begin
                 Found := True;
                 Break;
@@ -750,15 +734,13 @@ begin
       begin
         while (I < EnumLocaleList.Count) do
         begin
-          PrimaryLanguage := GetPrimaryLanguageID(
-            Windows.LCID(EnumLocaleList.Objects[I]));
-          Found := False;
-          J := I + 1;
+          PrimaryLanguage := GetPrimaryLanguageID(Windows.LCID(EnumLocaleList.Objects[I]));
+          Found           := False;
+          J               := I + 1;
 
           while (J < EnumLocaleList.Count) do
           begin
-            if (PrimaryLanguage = GetPrimaryLanguageID(
-              Windows.LCID(EnumLocaleList.Objects[J]))) then
+            if (PrimaryLanguage = GetPrimaryLanguageID(Windows.LCID(EnumLocaleList.Objects[J]))) then
             begin
               Found := True;
               EnumLocaleList.Delete(J);
@@ -791,9 +773,9 @@ var
   Cache: ^TStrings;
 begin
   case AOption of
-    lloAll: Cache := @Locales;
+    lloAll: Cache     := @Locales;
     lloPrimary: Cache := @PrimaryLocales;
-    lloSub: Cache := @SubLocales;
+    lloSub: Cache     := @SubLocales;
   else
     raise ENotImplemented.CreateResFmt(@SErrorOptionNotImplemented,
       [GetEnumName(TypeInfo(TLocaleListOption), Ord(AOption))]);
@@ -815,7 +797,7 @@ end;
 
 function LocaleByISO6391Code(const AAlpha2Code: string): Windows.LCID;
 var
-  I: Integer;
+  I:    Integer;
   List: TStrings;
 begin
   List := TStringList.Create;
@@ -888,8 +870,34 @@ begin
 end;
 
 function TGsLanguage.GetIdentifier: TGsLanguageIdentifier;
+var
+  I: TGsLanguageIdentifier;
 begin
+  if (Iso = '') then
+  begin
+    Result := lcUndefined;
+    Exit;
+  end
+  else
+  if (Iso = FCache.Iso) then
+  begin
+    Result := FCache.Identifier;
+    Exit;
+  end;
 
+  Result := lcUndefined;
+
+  for I := Low(I) to High(I) do
+  begin
+    if (PWord(Pointer(AnsiString(Iso)))^ = LANGUAGE_ISO2[I]) then
+    begin
+      Result := I;
+      Break;
+    end;
+  end;
+
+  FCache.Iso        := Iso;
+  FCache.Identifier := Result;
 end;
 
 function TGsLanguage.GetIsoAlpha2: TGsLanguageIsoAlpha2;
@@ -909,7 +917,7 @@ end;
 
 function TGsLanguage.GetLangID: LANGID;
 begin
-  Result := LocaleByISO6391Code(string(Alpha2));
+  Result := LocaleByISO6391Code(String(Alpha2));
 end;
 
 function TGsLanguage.GetNative: RawUTF8;
@@ -919,12 +927,30 @@ end;
 
 procedure TGsLanguage.SetIdentifier(const Value: TGsLanguageIdentifier);
 begin
+  SetString(FIso, PAnsiChar(@LANGUAGE_ISO2[GetIdentifier]), 2);
 
+  if (Value <> lcUndefined) then
+  begin
+    FCache.Iso        := FIso;
+    FCache.Identifier := Value;
+  end;
 end;
 
 procedure TGsLanguage.SetIsoAlpha2(const Value: TGsLanguageIsoAlpha2);
+var up: RawUTF8;
+    ndx: integer;
 begin
-
+(*
+  up := UpperCaseU(Trim(Value));
+  if length(up)=2 then begin
+    ndx := WordScanIndex(@COUNTRY_ISO2[ccFirst],length(COUNTRY_ISO2)-1,PWord(up)^);
+    if ndx>=0 then begin
+      SetIdentifier(TCountryIdentifier(ndx+1));
+      exit;
+    end;
+  end;
+  fIso := 0;
+  *)
 end;
 
 procedure TGsLanguage.SetIsoAlpha3B(const Value: TGsLanguageIsoAlpha3B);

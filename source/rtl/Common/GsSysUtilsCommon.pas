@@ -44,11 +44,11 @@ type
     class function IntToHex(Value: Integer; Digits: Integer;
       Group: Integer = 0): String; overload; override;
     class function IntToHex(Value: Int64; Digits: Integer;
-      Group: Boolean = False): String; overload; override;
+      Group: Integer = 0): String; overload; override;
     class function BinToHex(const B: String; Digits: Integer;
-      Group: Boolean = False): String; override;
+      Group: Integer = 0): String; override;
     class function StrToHex(const S: String;
-      Group: Boolean = False): String; override;
+      Group: Integer = 0): String; override;
 
     class function StrToBin(const S: String;
       OrdinalValues: Boolean = False): String; override;
@@ -78,7 +78,7 @@ uses
 { TGSConvCommon }
 
 class function TGSConvCommon.BinToHex(const B: String; Digits: Integer;
-  Group: Boolean): String;
+  Group: Integer): String;
 begin
 
 end;
@@ -166,13 +166,17 @@ end;
 class function TGSConvCommon.IntToHex(Value, Digits,
   Group: Integer): String;
 begin
+  Result := SysUtils.IntToHex(Value, Digits);
 
+  GroupString(Result, Group);
 end;
 
 class function TGSConvCommon.IntToHex(Value: Int64; Digits: Integer;
-  Group: Boolean): String;
+  Group: Integer): String;
 begin
+  Result := SysUtils.IntToHex(Value, Digits);
 
+  GroupString(Result, Group);
 end;
 
 class function TGSConvCommon.StrToBin(const S: String;
@@ -190,7 +194,7 @@ begin
 end;
 
 class function TGSConvCommon.StrToHex(const S: String;
-  Group: Boolean): String;
+  Group: Integer): String;
 begin
 
 end;
