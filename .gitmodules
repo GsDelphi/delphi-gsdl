@@ -1,0 +1,9 @@
+[submodule "source/include/jedi"]
+	path = source/include/jedi
+	url = https://github.com/GsDelphi/delphi-jedi.git
+[submodule "thirdparty/Synopse/mORMot"]
+	path = thirdparty/Synopse/mORMot
+	url = https://github.com/GsDelphi/mORMot.git
+[submodule "thirdparty/JackTrapper/Argon2"]
+	path = thirdparty/JackTrapper/Argon2
+	url = https://github.com/GsDelphi/delphi-argon2.git

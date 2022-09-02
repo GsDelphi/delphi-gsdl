@@ -11,11 +11,11 @@
 #
 # Diagram Portfolio file. Used by the diagram editor up to Delphi 7.
 # Uncomment this if you are not using diagrams or use newer Delphi version.
-#*.ddp
+*.ddp
 #
 # Visual LiveBindings file. Added in Delphi XE2.
 # Uncomment this if you are not using LiveBindings Designer.
-#*.vlb
+*.vlb
 #
 # Deployment Manager configuration file for your project. Added in Delphi XE2.
 # Uncomment this if it is not mobile development and you do not use remote debug feature.
@@ -64,3 +64,6 @@ __recovery/
 
 # Castalia statistics file (since XE7 Castalia is distributed with Delphi)
 *.stat
+
+# Common backups
+*.bak
