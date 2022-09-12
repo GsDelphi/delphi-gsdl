@@ -33,9 +33,12 @@ unit GsStreams;
 interface
 
 uses
-  SysUtils, Classes, GSZlib, DECCipher, DECUtil, SyncObjs;
+  SysUtils, Classes, GSZlib, DECCipherBase, DECCiphers, DECUtil, SyncObjs,
+  DECCipherFormats;
 
 type
+  Binary = type AnsiString;
+
   { Streaming }
   EGSSecureStream = class(Exception);
 
@@ -44,8 +47,8 @@ type
   private
     FDataStream: TMemoryStream;
     FCompressionLevel: TCompressionLevel;
-    FCipherClass: TDECCipherClass;
-    FCipher: TDECCipher;
+    FCipherClass: TDECFormattedCipherClass;
+    FCipher: TDECFormattedCipher;
     FCipherKey: Binary;
     FUseCompression: Boolean;
     FUseEncryption: Boolean;
@@ -57,7 +60,7 @@ type
     procedure SetSize(NewSize: Longint); override;
 
     procedure SetCompressionLevel(const Value: TCompressionLevel);
-    procedure SetCipherClass(const Value: TDECCipherClass);
+    procedure SetCipherClass(const Value: TDECFormattedCipherClass);
     procedure SetCipherKey(const Value: Binary);
     procedure SetUseCompression(const Value: Boolean);
     procedure SetUseEncryption(const Value: Boolean);
@@ -80,7 +83,7 @@ type
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(Offset: Longint; Origin: Word): Longint; override;
 
-    property CipherClass: TDECCipherClass read FCipherClass write SetCipherClass;
+    property CipherClass: TDECFormattedCipherClass read FCipherClass write SetCipherClass;
     property CipherKey: Binary read FCipherKey write SetCipherKey;
     property CompressionLevel: TCompressionLevel read FCompressionLevel write SetCompressionLevel;
     property UseCompression: Boolean read FUseCompression write SetUseCompression;
@@ -94,7 +97,7 @@ type
     FPositionWrite: Int64;
   protected
     function GetSize: Int64; override;
-    function Realloc(var NewCapacity: Longint): Pointer; override;
+    function Realloc(var NewCapacity: NativeInt): Pointer; override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -371,7 +374,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'Seek');{$ENDIF}
 end;
 
-procedure TGSSecureStream.SetCipherClass(const Value: TDECCipherClass);
+procedure TGSSecureStream.SetCipherClass(const Value: TDECFormattedCipherClass);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'SetCipherClass');{$ENDIF}
 
@@ -549,7 +552,7 @@ begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod(Self, 'Read');{$ENDIF}
 end;
 
-function TGSQueueStream.Realloc(var NewCapacity: Integer): Pointer;
+function TGSQueueStream.Realloc(var NewCapacity: NativeInt): Pointer;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod(Self, 'Realloc');{$ENDIF}
 

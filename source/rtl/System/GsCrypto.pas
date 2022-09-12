@@ -35,14 +35,22 @@ interface
 
 uses
   Classes,
-  DECCipher,
-  DECFmt,
+  DECCipherBase,
+  DECCiphers,
+  DECFormat,
+  DECHashBase,
+  DECHashAuthentication,
   DECHash,
   DECUtil,
   SysUtils;
 
 type
   EGsCrypto = class(Exception);
+
+  IDECProgress = interface
+    ['{64366E77-82FE-4B86-951E-79389729A493}']
+    procedure Process(const Min, Max, Pos: Int64); stdcall;
+  end;
 
 const
   DEFAULT_CIPHER_MODE = cmCBCx;
@@ -51,179 +59,179 @@ const
 var
   DEFAULT_FORMAT_CLASS: TDECFormatClass = TFormat_Copy;
   DEFAULT_CIPHER_CLASS: TDECCipherClass = TCipher_Rijndael;
-  DEFAULT_HASH_CLASS:   TDECHashClass = THash_Whirlpool;
+  DEFAULT_HASH_CLASS:   TDECHashExtendedClass = THash_Whirlpool0;
 
 { Crypto functions }
 
 procedure Encrypt(const Source: TBytes; var Dest: TBytes; const APassword: TBytes;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 function Encrypt(const AText: string; const APassword: string;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): string; overload;
 
 function Encrypt(const AText: AnsiString; const APassword: AnsiString;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): AnsiString;
   overload;
 
 function Encrypt(const AText: WideString; const APassword: WideString;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): WideString;
   overload;
 
 function Encrypt(const AText: RawByteString; const APassword: RawByteString;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): RawByteString; overload;
 
 
 procedure Decrypt(const Source: TBytes; var Dest: TBytes; const APassword: TBytes;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 function Decrypt(const AText: string; const APassword: string;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): string; overload;
 
 function Decrypt(const AText: AnsiString; const APassword: AnsiString;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): AnsiString;
   overload;
 
 function Decrypt(const AText: WideString; const APassword: WideString;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): WideString;
   overload;
 
 function Decrypt(const AText: RawByteString; const APassword: RawByteString;
   ATextFormat: TDECFormatClass = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX): RawByteString;
   overload;
 
 
 procedure EncryptFile(const Source, Dest: string; const APassword: TBytes;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: string;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: AnsiString;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: WideString;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: RawByteString;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 
 procedure DecryptFile(const Source, Dest: string; const APassword: TBytes;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: string;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: AnsiString;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: WideString;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: RawByteString;
   const Progress: IDECProgress = nil; ACipherClass: TDECCipherClass = nil;
-  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashClass = nil;
+  ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE; AHashClass: TDECHashExtendedClass = nil;
   AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: TBytes; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: string; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: AnsiString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: WideString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: RawByteString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: ShortString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: TBytes; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: string; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: AnsiString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: WideString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: RawByteString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: ShortString; const Progress: IDECProgress = nil;
   ACipherClass: TDECCipherClass = nil; ACipherMode: TCipherMode = DEFAULT_CIPHER_MODE;
-  AHashClass: TDECHashClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
+  AHashClass: TDECHashExtendedClass = nil; AKDFIndex: LongWord = DEFAULT_KDF_INDEX); overload;
 
 
 function HashPassword(const Password: UnicodeString): string; overload;
@@ -235,6 +243,8 @@ implementation
 
 uses
   {$IFDEF USE_CODESITE}BPLogging,{$ENDIF}
+  DECFormatBase,
+  DECRandom,
   Argon2,
   JclSysInfo,
   System.Diagnostics;
@@ -248,11 +258,12 @@ const
 
 procedure Encrypt(const Source: TBytes; var Dest: TBytes; const APassword: TBytes;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 var
-  ASalt: Binary;
-  AKey:  Binary;
-  AData: Binary;
+  ASalt: TBytes;
+  AKey:  TBytes;
+  AData: TBytes;
+  FmtData: RawByteString;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('Encrypt');{$ENDIF}
 
@@ -273,29 +284,29 @@ begin
   with ValidCipher(ACipherClass).Create, Context do
     try
       { Generate a salt }
-      ASalt := RandomBinary(DEFAULT_SALT_LEN);
+      ASalt := RandomBytes(DEFAULT_SALT_LEN);
 
       { Calculate the key }
-      AKey := ValidHash(AHashClass).KDFx(APassword[0], Length(APassword),
-        ASalt[1], Length(ASalt), KeySize, TFormat_Copy, AKDFIndex);
+      AKey := TDECHashExtended(ValidHash(AHashClass)).KDFx(APassword[0], Length(APassword),
+        ASalt[1], Length(ASalt), KeySize, AKDFIndex);
 
       { Encode data }
       Mode := ACipherMode;
-      Init(AKey);
-      SetLength(AData, Length(Source));
-      Encode(Source[0], AData[1], Length(AData));
+      Init(AKey, nil);
+      AData := EncodeBytes(Source);
 
       { Format encoded data }
-      AData := ValidFormat(ATextFormat).Encode(ASalt + AData + CalcMAC);
+      FmtData := ValidFormat(ATextFormat).Encode(BytesToRawString(ASalt) + BytesToRawString(AData) + CalcMAC);
 
       { Return the encoded data }
-      SetLength(Dest, Length(AData));
-      Move(AData[1], Dest[0], Length(Dest));
+      SetLength(Dest, Length(FmtData));
+      Move(FmtData[1], Dest[0], Length(Dest));
     finally
       Free;
-      ProtectBinary(ASalt);
-      ProtectBinary(AKey);
-      ProtectBinary(AData);
+      ProtectBytes(ASalt);
+      ProtectBytes(AKey);
+      ProtectBytes(AData);
+      ProtectString(FmtData);
     end;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('Encrypt');{$ENDIF}
@@ -303,7 +314,7 @@ end;
 
 function Encrypt(const AText: string; const APassword: string;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord): string;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord): string;
 var
   AData: TBytes;
 begin
@@ -322,7 +333,7 @@ end;
 
 function Encrypt(const AText: AnsiString; const APassword: AnsiString;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord): AnsiString;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord): AnsiString;
 var
   AData: TBytes;
 begin
@@ -342,7 +353,7 @@ end;
 
 function Encrypt(const AText: WideString; const APassword: WideString;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord): WideString;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord): WideString;
 var
   AData: TBytes;
 begin
@@ -361,7 +372,7 @@ end;
 
 function Encrypt(const AText: RawByteString; const APassword: RawByteString;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass;
   AKDFIndex: LongWord): RawByteString;
 var
   AData: TBytes;
@@ -382,13 +393,13 @@ end;
 
 procedure Decrypt(const Source: TBytes; var Dest: TBytes; const APassword: TBytes;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 var
-  ASalt: Binary;
+  ASalt: RawByteString;
   ALen:  Integer;
-  AData: Binary;
-  AMAC:  Binary;
-  AKey:  Binary;
+  AData: TBytes;
+  AMAC:  RawByteString;
+  AKey:  TBytes;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('Decrypt');{$ENDIF}
 
@@ -415,33 +426,33 @@ begin
       if (ALen < 1) then
         raise EGsCrypto.CreateRes(@SErrorDecodingData);
 
-      AData := System.Copy(ASalt, DEFAULT_SALT_LEN + 1, ALen);
+      SetLength(AData, ALen);
+      Move(ASalt[DEFAULT_SALT_LEN + 1], AData[0], ALen);
       AMAC  := System.Copy(ASalt, ALen + DEFAULT_SALT_LEN + 1, BufferSize);
       SetLength(ASalt, DEFAULT_SALT_LEN);
 
       { Calculate the key }
-      AKey := ValidHash(AHashClass).KDFx(APassword[0], Length(APassword),
-        ASalt[1], Length(ASalt), KeySize, TFormat_Copy, AKDFIndex);
+      AKey := TDECHashExtended(ValidHash(AHashClass)).KDFx(APassword[0], Length(APassword),
+        ASalt[1], Length(ASalt), KeySize, AKDFIndex);
 
       { Decode data }
       Mode := ACipherMode;
-      Init(AKey);
-      SetLength(Dest, ALen);
-      Decode(AData[1], Dest[0], ALen);
+      Init(AKey, nil);
+      Dest := DecodeBytes(AData, nil);
 
       { Verify MAC }
       if (AMAC <> CalcMAC) then
       begin
-        ProtectBuffer(Dest[0], ALen);
+        ProtectBytes(Dest);
         SetLength(Dest, 0);
         raise EGsCrypto.CreateRes(@SErrorDecryptingData);
       end;
     finally
       Free;
-      ProtectBinary(ASalt);
-      ProtectBinary(AData);
-      ProtectBinary(AMAC);
-      ProtectBinary(AKey);
+      ProtectString(ASalt);
+      ProtectBytes(AData);
+      ProtectString(AMAC);
+      ProtectBytes(AKey);
     end;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('Decrypt');{$ENDIF}
@@ -449,7 +460,7 @@ end;
 
 function Decrypt(const AText: string; const APassword: string;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord): string;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord): string;
 var
   AData: TBytes;
 begin
@@ -468,7 +479,7 @@ end;
 
 function Decrypt(const AText: AnsiString; const APassword: AnsiString;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord): AnsiString;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord): AnsiString;
 var
   AData: TBytes;
 begin
@@ -488,7 +499,7 @@ end;
 
 function Decrypt(const AText: WideString; const APassword: WideString;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord): WideString;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord): WideString;
 var
   AData: TBytes;
 begin
@@ -507,7 +518,7 @@ end;
 
 function Decrypt(const AText: RawByteString; const APassword: RawByteString;
   ATextFormat: TDECFormatClass; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass;
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass;
   AKDFIndex: LongWord): RawByteString;
 var
   AData: TBytes;
@@ -528,7 +539,7 @@ end;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: TBytes;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 var
   Src, Dst: TStream;
 begin
@@ -554,7 +565,7 @@ end;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: string;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptFile');{$ENDIF}
 
@@ -566,7 +577,7 @@ end;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: AnsiString;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptFile');{$ENDIF}
 
@@ -578,7 +589,7 @@ end;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: WideString;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptFile');{$ENDIF}
 
@@ -590,7 +601,7 @@ end;
 
 procedure EncryptFile(const Source, Dest: string; const APassword: RawByteString;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptFile');{$ENDIF}
 
@@ -602,7 +613,7 @@ end;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: TBytes;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 var
   Src, Dst: TStream;
 begin
@@ -628,7 +639,7 @@ end;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: string;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptFile');{$ENDIF}
 
@@ -640,7 +651,7 @@ end;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: WideString;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptFile');{$ENDIF}
 
@@ -652,7 +663,7 @@ end;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: AnsiString;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptFile');{$ENDIF}
 
@@ -664,7 +675,7 @@ end;
 
 procedure DecryptFile(const Source, Dest: string; const APassword: RawByteString;
   const Progress: IDECProgress; ACipherClass: TDECCipherClass;
-  ACipherMode: TCipherMode; AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  ACipherMode: TCipherMode; AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptFile');{$ENDIF}
 
@@ -677,11 +688,13 @@ end;
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: TBytes; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 var
-  ASalt: Binary;
-  AKey:  Binary;
-  AMAC:  Binary;
+  ASalt: TBytes;
+  AKey:  TBytes;
+  SourceBytes: TBytes;
+  DestBytes: TBytes;
+  AMAC:  RawByteString;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptStream');{$ENDIF}
 
@@ -699,28 +712,30 @@ begin
   with ValidCipher(ACipherClass).Create, Context do
     try
       { Generate a salt }
-      ASalt := RandomBinary(DEFAULT_SALT_LEN);
+      ASalt := RandomBytes(DEFAULT_SALT_LEN);
 
       { Calculate the key }
-      AKey := ValidHash(AHashClass).KDFx(APassword[0], Length(APassword),
-        ASalt[1], Length(ASalt), KeySize, TFormat_Copy, AKDFIndex);
+      AKey := TDECHashExtended(ValidHash(AHashClass)).KDFx(APassword[0], Length(APassword),
+        ASalt[1], Length(ASalt), KeySize, AKDFIndex);
 
       { Add salt }
       Dest.WriteBuffer(ASalt[1], Length(ASalt));
 
       { Encode data }
       Mode := ACipherMode;
-      Init(AKey);
-      EncodeStream(Source, Dest, DataSize, Progress);
+      Init(AKey, nil);
+      Source.ReadBuffer(SourceBytes, Source.Size);
+      DestBytes := EncodeBytes(SourceBytes);
+      Dest.WriteBuffer(DestBytes, Length(DestBytes));
 
       { Add MAC }
       AMAC := CalcMAC;
       Dest.WriteBuffer(AMAC[1], Length(AMAC));
     finally
       Free;
-      ProtectBinary(ASalt);
-      ProtectBinary(AKey);
-      ProtectBinary(AMAC);
+      ProtectBytes(ASalt);
+      ProtectBytes(AKey);
+      ProtectString(AMAC);
     end;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('EncryptStream');{$ENDIF}
@@ -729,7 +744,7 @@ end;
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: string; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptStream');{$ENDIF}
 
@@ -742,7 +757,7 @@ end;
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: WideString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptStream');{$ENDIF}
 
@@ -755,7 +770,7 @@ end;
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: AnsiString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptStream');{$ENDIF}
 
@@ -768,7 +783,7 @@ end;
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: RawByteString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptStream');{$ENDIF}
 
@@ -781,7 +796,7 @@ end;
 procedure EncryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: ShortString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('EncryptStream');{$ENDIF}
 
@@ -794,12 +809,14 @@ end;
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: TBytes; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 var
   SavedPosSource, SavedPosDest: Int64;
-  ASalt: Binary;
-  AKey:  Binary;
-  AMAC:  Binary;
+  ASalt: RawByteString;
+  AKey:  TBytes;
+  SourceBytes: TBytes;
+  DestBytes: TBytes;
+  AMAC:  RawByteString;
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptStream');{$ENDIF}
 
@@ -823,13 +840,15 @@ begin
       Source.ReadBuffer(ASalt[1], Length(ASalt));
 
       { Calculate the key }
-      AKey := ValidHash(AHashClass).KDFx(APassword[0], Length(APassword),
-        ASalt[1], Length(ASalt), KeySize, TFormat_Copy, AKDFIndex);
+      AKey := TDECHashExtended(ValidHash(AHashClass)).KDFx(APassword[0], Length(APassword),
+        ASalt[1], Length(ASalt), KeySize, AKDFIndex);
 
       { Decode data }
       Mode := ACipherMode;
-      Init(AKey);
-      DecodeStream(Source, Dest, DataSize - Length(ASalt) - BufferSize, Progress);
+      Init(AKey, nil);
+      Source.ReadBuffer(SourceBytes, DataSize - Length(ASalt) - BufferSize);
+      DestBytes := DecodeBytes(SourceBytes, nil);
+      Dest.WriteBuffer(DestBytes, Length(DestBytes));
 
       { Read MAC }
       SetLength(AMAC, BufferSize);
@@ -847,9 +866,9 @@ begin
       end;
     finally
       Free;
-      ProtectBinary(ASalt);
-      ProtectBinary(AKey);
-      ProtectBinary(AMAC);
+      ProtectString(ASalt);
+      ProtectBytes(AKey);
+      ProtectString(AMAC);
     end;
 
   {$IFDEF USE_CODESITE}BPC_CodeSite.ExitMethod('DecryptStream');{$ENDIF}
@@ -858,7 +877,7 @@ end;
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: string; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptStream');{$ENDIF}
 
@@ -871,7 +890,7 @@ end;
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: AnsiString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptStream');{$ENDIF}
 
@@ -884,7 +903,7 @@ end;
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: WideString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptStream');{$ENDIF}
 
@@ -897,7 +916,7 @@ end;
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: RawByteString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptStream');{$ENDIF}
 
@@ -910,7 +929,7 @@ end;
 procedure DecryptStream(const Source, Dest: TStream; const DataSize: Int64;
   const APassword: ShortString; const Progress: IDECProgress;
   ACipherClass: TDECCipherClass; ACipherMode: TCipherMode;
-  AHashClass: TDECHashClass; AKDFIndex: LongWord);
+  AHashClass: TDECHashExtendedClass; AKDFIndex: LongWord);
 begin
   {$IFDEF USE_CODESITE}BPC_CodeSite.EnterMethod('DecryptStream');{$ENDIF}
 

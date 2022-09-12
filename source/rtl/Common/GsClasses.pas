@@ -25,8 +25,8 @@ interface
 
 uses
   Classes,
-  DECCipher,
-  DECFmt,
+  DECCiphers,
+  DECFormat,
   DECHash,
   DECUtil,
   GsCrypto,

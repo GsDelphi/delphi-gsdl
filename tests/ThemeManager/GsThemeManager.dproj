@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{52BC6175-FA71-4704-884B-A320DE317BBC}</ProjectGuid>
-        <ProjectVersion>14.3</ProjectVersion>
+        <ProjectVersion>19.4</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <MainSource>GsThemeManager.dpr</MainSource>
         <Base>True</Base>
@@ -39,22 +39,34 @@
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
+        <SanitizedProjectName>GsThemeManager</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <DCC_UsePackage>IndyIPClient;JvBDE;JvGlobus;JvMM;JvManagedThreads;ZComponent;DBXSqliteDriver;WizardComponents;fmx;RaizeComponentsVcl;IndySystem;JvDlgs;TeeDB;MMCSnapins;JvCrypt;vclib;inetdbbde;DBXInterBaseDriver;DataSnapClient;DataSnapCommon;DataSnapServer;JvNet;DataSnapProviderClient;JvDotNetCtrls;DBXSybaseASEDriver;DbxCommonDriver;vclimg;dbxcds;frxIBX17;MetropolisUILiveTile;JvXPCtrls;fsBDE17;BPVCL;vcldb;CodeSiteLoggingPkg;vcldsnap;DBXDb2Driver;BPDBCL;MMCExpert;DBXOracleDriver;CustomIPTransport;JvCore;vclribbon;dsnap;IndyIPServer;fmxase;vcl;IndyCore;IndyIPCommon;CloudService;DBXMSSQLDriver;FmxTeeUI;frxDB17;BPDeprecated;JvAppFrm;fsIBX17;JvDB;JvRuntimeDesign;inetdbxpress;webdsnap;NativeExcelD2012;JclDeveloperTools;JvDocking;adortl;JvWizards;localizer17;fs17;frx17;JvHMI;bindcompfmx;frxDBX17;JvBands;vcldbx;RaizeComponentsVclDb;BPICL;fsTee17;ZDbc;rtl;dbrtl;DbxClientDriver;BPRTL;ZPlain;bindcomp;inetdb;frxcs17;JvPluginSystem;Tee;JclContainers;DBXOdbcDriver;BPFCL;JvCmp;JvSystem;xmlrtl;svnui;ibxpress;JvTimeFramework;JvControls;IndyProtocols;DBXMySQLDriver;vclactnband;bindengine;soaprtl;bindcompdbx;FMXTee;TeeUI;bindcompvcl;fsADO17;JvStdCtrls;Jcl;vclie;frxADO17;JvCustom;JvJans;JvPageComps;JvPrintPreview;vcltouch;CodeSiteDBToolsPkg;ZCore;websnap;BPDCL;VclSmp;IcsDel170;DBXInformixDriver;BPSCL;Intraweb;DataSnapConnectors;dsnapcon;DBXFirebirdDriver;inet;fsDB17;fmxobj;JclVcl;JvPascalInterpreter;ZParseSql;vclx;frxe17;svn;DBXSybaseASADriver;fmxdae;vclAbsDBd17;bdertl;frxBDE17;dbexpress;EurekaLogCore;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
+        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_UsePackage>IndyIPClient;ZComponent;DBXSqliteDriver;fmx;RaizeComponentsVcl;IndySystem;TeeDB;vclib;DBXInterBaseDriver;DataSnapClient;DataSnapCommon;DataSnapServer;DataSnapProviderClient;DBXSybaseASEDriver;DbxCommonDriver;vclimg;dbxcds;MetropolisUILiveTile;vcldb;vcldsnap;DBXDb2Driver;DBXOracleDriver;CustomIPTransport;dsnap;IndyIPServer;fmxase;vcl;IndyCore;IndyIPCommon;DBXMSSQLDriver;inetdbxpress;webdsnap;adortl;localizer17;bindcompfmx;RaizeComponentsVclDb;ZDbc;rtl;dbrtl;DbxClientDriver;ZPlain;bindcomp;inetdb;Tee;DBXOdbcDriver;xmlrtl;ibxpress;IndyProtocols;DBXMySQLDriver;vclactnband;bindengine;soaprtl;bindcompdbx;TeeUI;bindcompvcl;vclie;vcltouch;ZCore;websnap;VclSmp;DBXInformixDriver;DataSnapConnectors;dsnapcon;DBXFirebirdDriver;inet;fmxobj;ZParseSql;vclx;DBXSybaseASADriver;fmxdae;vclAbsDBd17;dbexpress;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
+        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -73,7 +85,10 @@
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
-        <DCC_DebugInformation>false</DCC_DebugInformation>
+        <DCC_DebugInformation>0</DCC_DebugInformation>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <BT_BuildType>Debug</BT_BuildType>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -95,15 +110,15 @@
             <Form>GsImageListEditor</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <BuildConfiguration Include="Release">
-            <Key>Cfg_2</Key>
-            <CfgParent>Base</CfgParent>
-        </BuildConfiguration>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
         </BuildConfiguration>
     </ItemGroup>
@@ -159,7 +174,7 @@
                     <Source Name="MainSource">GsThemeManager.dpr</Source>
                 </Source>
             </Delphi.Personality>
-            <Deployment/>
+            <Deployment Version="3"/>
             <Platforms>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
@@ -169,12 +184,5 @@
     </ProjectExtensions>
     <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+    <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
 </Project>
-
-<!-- EurekaLog First Line
-[Exception Log]
-EurekaLog Version=7001
-Activate=0
-DeleteMapAfterCompile=1
-Encrypt Password=""
-EurekaLog Last Line -->
